@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import html
 import json
 import os
 from datetime import date, timedelta
@@ -26,8 +27,29 @@ from travel_assistant.planner import build_itinerary, calculate_budget, format_m
 from travel_assistant.weather import get_weather_forecast
 
 
+CITY_PHOTOS = {
+    "Delhi": {
+        "url": "https://images.unsplash.com/photo-1609258678760-ba05d9b95bb9?auto=format&fit=crop&w=1100&q=85",
+        "credit": "https://unsplash.com/photos/people-walking-on-brown-concrete-arch-during-daytime-_q0DyZcOlMY",
+    },
+    "Goa": {
+        "url": "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1100&q=85",
+        "credit": "https://unsplash.com/s/photos/goa-beaches",
+    },
+    "Jaipur": {
+        "url": "https://images.unsplash.com/photo-1578999935853-4ec5fa6c1f60?auto=format&fit=crop&w=1100&q=85",
+        "credit": "https://unsplash.com/photos/hawa-mahal-with-many-windows-Gow54BJA3tc",
+    },
+    "Mumbai": {
+        "url": "https://images.unsplash.com/photo-1625731226721-b4d51ae70e20?auto=format&fit=crop&w=1100&q=85",
+        "credit": "https://unsplash.com/photos/people-walking-near-white-concrete-building-under-blue-sky-during-daytime-xH43OxDSXYw",
+    },
+}
+HERO_PHOTO = "https://images.unsplash.com/photo-1523979934836-981ca2ded72f?auto=format&fit=crop&w=2000&q=90"
+
+
 load_dotenv()
-st.set_page_config(page_title="Travel Planner", page_icon="🧭", layout="wide")
+st.set_page_config(page_title="Trailwise | India Travel Guide", page_icon="🧭", layout="wide")
 
 
 def _setting(name: str) -> str:
@@ -77,6 +99,50 @@ def _format_place(place: dict[str, Any]) -> dict[str, Any]:
         "Type": place.get("type"),
         "Rating": place.get("rating"),
     }
+
+
+def _render_place_card(place: dict[str, Any]) -> None:
+    title = html.escape(str(place.get("name", "Local place")))
+    city = html.escape(str(place.get("city", "")))
+    category = html.escape(str(place.get("type", "place")).title())
+    rating = html.escape(str(place.get("rating", "—")))
+    st.markdown(
+        f"<article class='listing-card'><div class='listing-kicker'>{category}</div>"
+        f"<h3>{title}</h3><p class='listing-city'>{city}, India</p>"
+        f"<div class='listing-rating'><span class='rating-dot'>★</span><strong>{rating}</strong>"
+        "<span>sample dataset rating</span></div></article>",
+        unsafe_allow_html=True,
+    )
+
+
+def _render_hotel_card(hotel: dict[str, Any]) -> None:
+    title = html.escape(str(hotel.get("name", "Local stay")))
+    city = html.escape(str(hotel.get("city", "")))
+    stars = int(hotel.get("stars", 0))
+    price = int(hotel.get("price_per_night", 0))
+    amenities = ", ".join(str(item).title() for item in hotel.get("amenities", [])[:3])
+    amenities = html.escape(amenities or "Details not listed")
+    st.markdown(
+        f"<article class='listing-card stay-card'><div class='listing-kicker'>{'★' * stars} stay</div>"
+        f"<h3>{title}</h3><p class='listing-city'>{city}, India</p>"
+        f"<p class='amenities'>{amenities}</p><div class='stay-price'>₹{price:,}"
+        "<span> / night · sample price</span></div></article>",
+        unsafe_allow_html=True,
+    )
+
+
+def _render_city_card(city: str, places_count: int, hotels_count: int) -> None:
+    photo = CITY_PHOTOS.get(city)
+    if not photo:
+        return
+    safe_city = html.escape(city)
+    st.markdown(
+        f"<article class='destination-card'><img src='{photo['url']}' alt='{safe_city} destination' loading='lazy'>"
+        f"<div class='destination-shade'></div><div class='destination-copy'>"
+        f"<span>INDIA · EXPLORE</span><h3>{safe_city}</h3>"
+        f"<p>{places_count} places · {hotels_count} stays in this sample</p></div></article>",
+        unsafe_allow_html=True,
+    )
 
 
 def _render_result(result: dict[str, Any]) -> None:
@@ -211,19 +277,49 @@ def _render_result(result: dict[str, Any]) -> None:
 
 def main() -> None:
     st.markdown(
-        "<div class='hero'><div class='eyebrow'>TRAVEL PLANNING ASSISTANT</div>"
-        "<h1>Plan a trip that fits your days and budget.</h1>"
-        "<p>Compare the supplied travel data, check the forecast, and shape a day-by-day itinerary.</p></div>",
-        unsafe_allow_html=True,
-    )
-    st.markdown(
         "<style>"
-        ".hero{padding:1.7rem 2rem;margin:0 0 1.1rem;border-radius:18px;"
-        "background:linear-gradient(120deg,#0f766e,#164e63);color:white;}"
-        ".hero .eyebrow{font-size:.75rem;letter-spacing:.13em;opacity:.82;font-weight:700;}"
-        ".hero h1{font-size:2.2rem;margin:.45rem 0;}"
-        ".hero p{font-size:1.05rem;margin:0;opacity:.93;}"
-        "</style>",
+        ":root{--primary-color:#07966a}.stApp{background:#f7f8f5;color:#1d2927}.block-container{max-width:1240px;padding-top:1rem;padding-bottom:4rem}"
+        "[data-testid='stHeader']{background:transparent} [data-testid='stSidebar']{background:#f0f3ed;border-right:1px solid #e2e9e2}"
+        ".site-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.2rem .15rem 1.15rem;color:#183b36}"
+        ".brand{font-size:1.4rem;font-weight:850;letter-spacing:-.04em}.brand-mark{display:inline-grid;place-items:center;"
+        "width:30px;height:30px;margin-right:.42rem;border-radius:10px;background:#00aa75;color:white;font-size:1rem}"
+        ".site-nav{display:flex;gap:1.5rem;font-size:.92rem;font-weight:650}.site-nav a{color:#294642;text-decoration:none}"
+        ".site-meta{color:#56716a;font-size:.85rem;font-weight:650}"
+        ".hero{position:relative;isolation:isolate;display:flex;align-items:flex-end;min-height:340px;overflow:hidden;"
+        "padding:2.4rem 2.8rem;border-radius:28px;color:#fff;background-image:linear-gradient(90deg,rgba(8,38,40,.82),rgba(8,38,40,.18)),"
+        f"url('{HERO_PHOTO}');background-position:center 53%;background-size:cover;box-shadow:0 18px 45px rgba(22,54,47,.16)}}"
+        ".hero-copy{max-width:690px}.eyebrow{font-size:.75rem;letter-spacing:.15em;font-weight:800;color:#d5f4df}"
+        ".hero h1{font-size:clamp(2.35rem,5vw,4.2rem);line-height:1.02;letter-spacing:-.055em;margin:.65rem 0 1rem;color:#fff}"
+        ".hero p{font-size:1.08rem;max-width:590px;line-height:1.55;color:#eef6f1;margin:0}"
+        ".section-title{margin:2.35rem 0 1rem}.section-title h2{font-size:1.75rem;letter-spacing:-.04em;color:#1b302c;margin:0}"
+        ".section-title p{color:#6b7e78;margin:.35rem 0 0}.destination-card{height:250px;position:relative;overflow:hidden;"
+        "border-radius:20px;background:#dce9df;box-shadow:0 8px 24px rgba(29,55,47,.1);transition:transform .2s ease}"
+        ".destination-card:hover{transform:translateY(-4px)}.destination-card img{width:100%;height:100%;object-fit:cover;display:block}"
+        ".destination-shade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(11,31,31,.78))}"
+        ".destination-copy{position:absolute;left:1rem;right:1rem;bottom:1rem;color:white}.destination-copy span{font-size:.65rem;letter-spacing:.13em;font-weight:800;opacity:.85}"
+        ".destination-copy h3{font-size:1.55rem;margin:.2rem 0;color:white}.destination-copy p{font-size:.77rem;margin:0;color:#f1f5f1}"
+        ".listing-card{min-height:170px;height:auto;box-sizing:border-box;padding:1.1rem 1.15rem;border:1px solid #e2e8e1;border-radius:18px;background:#fff;"
+        "box-shadow:0 5px 18px rgba(26,56,47,.045);margin-bottom:.7rem}.listing-kicker{color:#16875f;font-size:.72rem;font-weight:800;"
+        "letter-spacing:.07em;text-transform:uppercase}.listing-card h3{font-size:1.08rem;line-height:1.2;color:#253b36;margin:.55rem 0 .25rem}"
+        ".listing-city,.amenities{color:#74837e;font-size:.82rem;margin:0}.listing-rating{display:flex;align-items:center;gap:.42rem;margin-top:.85rem;"
+        "font-size:.77rem;color:#7b8983}.listing-rating strong{color:#253b36}.rating-dot{display:inline-grid;place-items:center;"
+        "width:21px;height:21px;border-radius:50%;background:#00aa75;color:white;font-size:.72rem}.stay-card{min-height:205px;height:auto}"
+        ".stay-price{margin-top:.65rem;color:#213933;font-weight:800;font-size:1rem;white-space:nowrap}.stay-price span{font-size:.76rem;font-weight:500;color:#7b8983}"
+        ".photo-note{color:#87928d;font-size:.7rem;margin-top:.6rem}.data-note{padding:.8rem 1rem;border-radius:12px;"
+        "background:#eef4ed;border:1px solid #dfe9df;color:#5c7168;font-size:.78rem}"
+        "div[data-testid='stForm']{border:1px solid #e3e9e2;background:#fff;border-radius:20px;padding:1rem 1.2rem}"
+        "div[data-testid='stFormSubmitButton'] button,div.stButton button[kind='primary']{border-radius:12px;font-weight:750;background:#07966a!important;border-color:#07966a!important;color:#fff!important}"
+        "@media(max-width:700px){.site-header{gap:.35rem;align-items:flex-start;flex-wrap:wrap}.brand{font-size:1.15rem;white-space:nowrap;flex:0 0 100%}"
+        ".brand-mark{width:25px;height:25px;margin-right:.25rem}.site-nav{gap:.82rem;font-size:.72rem;max-width:calc(100vw - 120px);overflow-x:auto}"
+        ".site-meta{display:none}.hero{min-height:300px;padding:1.5rem;border-radius:20px}.destination-card{height:210px}}"
+        "</style>"
+        "<header class='site-header'><div class='brand'><span class='brand-mark'>✦</span>TRAILWISE</div>"
+        "<nav class='site-nav'><a href='#discover'>Discover</a><a href='#stays'>Stays</a>"
+        "<a href='#things'>Things to do</a><a href='#planner'>Plan a trip</a></nav>"
+        "<div class='site-meta'>INDIA&nbsp;&nbsp; · &nbsp;&nbsp;₹ INR</div></header>"
+        "<section class='hero' id='discover'><div class='hero-copy'><div class='eyebrow'>GO A LITTLE FURTHER</div>"
+        "<h1>Find your next<br>favorite place.</h1>"
+        "<p>Discover memorable places to visit, stays for every kind of trip, and a plan that fits your budget.</p></div></section>",
         unsafe_allow_html=True,
     )
 
@@ -241,15 +337,105 @@ def main() -> None:
     flight_range = departure_date_range(datasets["flights"])
     if flight_range:
         flight_coverage = f"{flight_range[0]} to {flight_range[1]}"
-        if flight_range[1] < date.today():
-            st.info(
-                f"The supplied flight schedule covers {flight_coverage} and contains only past dates. "
-                "Future trips may need a manual flight estimate."
-            )
-        else:
-            st.info(f"The supplied flight schedule covers {flight_coverage}.")
     else:
         flight_coverage = "no valid departure dates"
+
+    st.markdown(
+        "<div class='section-title'><h2>Where would you like to go?</h2>"
+        "<p>Search the destinations and sample listings included with this travel guide.</p></div>",
+        unsafe_allow_html=True,
+    )
+    city_options = ["All destinations", *cities]
+    with st.form("discovery_search"):
+        search_scope = st.radio(
+            "Browse",
+            ["Everything", "Things to do", "Stays"],
+            horizontal=True,
+            label_visibility="collapsed",
+            key="discovery_scope_input",
+        )
+        search_left, search_right = st.columns([3, 1])
+        search_city = search_left.selectbox(
+            "Destination",
+            city_options,
+            index=city_options.index(st.session_state.get("discovery_city", "All destinations")),
+            key="discovery_city_input",
+        )
+        search_submit = search_right.form_submit_button("Search", type="primary", width="stretch")
+    if search_submit:
+        st.session_state["discovery_scope"] = search_scope
+        st.session_state["discovery_city"] = search_city
+    active_scope = st.session_state.get("discovery_scope", st.session_state.get("discovery_scope_input", "Everything"))
+    active_city = st.session_state.get("discovery_city", st.session_state.get("discovery_city_input", "All destinations"))
+    place_records = [
+        place for place in datasets["places"]
+        if active_city == "All destinations" or place.get("city") == active_city
+    ]
+    hotel_records = [
+        hotel for hotel in datasets["hotels"]
+        if active_city == "All destinations" or hotel.get("city") == active_city
+    ]
+    st.markdown(
+        "<div class='data-note'>This guide uses sample project data. Ratings, hotel prices, and flight schedules are not live offers or traveler reviews.</div>",
+        unsafe_allow_html=True,
+    )
+
+    st.markdown(
+        "<div class='section-title' id='destinations'><h2>Places that stay with you</h2>"
+        "<p>Start with a city, then explore the places and stays in its sample guide.</p></div>",
+        unsafe_allow_html=True,
+    )
+    destination_cities = [city for city in ("Goa", "Jaipur", "Delhi", "Mumbai") if city in cities]
+    destination_columns = st.columns(len(destination_cities))
+    for column, city in zip(destination_columns, destination_cities):
+        with column:
+            place_count = sum(place.get("city") == city for place in datasets["places"])
+            hotel_count = sum(hotel.get("city") == city for hotel in datasets["hotels"])
+            _render_city_card(city, place_count, hotel_count)
+    photo_credits = " · ".join(
+        f"<a href='{CITY_PHOTOS[city]['credit']}' target='_blank' rel='noreferrer'>{html.escape(city)} photo</a>"
+        for city in destination_cities
+    )
+    st.markdown(
+        f"<div class='photo-note'>Destination photos via Unsplash: {photo_credits}. Hero image: "
+        "<a href='https://unsplash.com/photos/white-and-brown-concrete-structure--nWdnO-ny2Q' target='_blank' rel='noreferrer'>Taj Mahal</a>.</div>",
+        unsafe_allow_html=True,
+    )
+
+    if active_scope in {"Everything", "Things to do"}:
+        st.markdown(
+            "<div class='section-title' id='things'><h2>Things to do</h2>"
+            "<p>Popular places from the supplied destination dataset.</p></div>",
+            unsafe_allow_html=True,
+        )
+        top_places = sorted(place_records, key=lambda item: float(item.get("rating", 0)), reverse=True)[:6]
+        if top_places:
+            for start in range(0, len(top_places), 3):
+                place_columns = st.columns(3)
+                for column, place in zip(place_columns, top_places[start:start + 3]):
+                    with column:
+                        _render_place_card(place)
+        else:
+            st.info("No places are listed for this destination in the sample dataset.")
+
+    if active_scope in {"Everything", "Stays"}:
+        st.markdown(
+            "<div class='section-title' id='stays'><h2>Stay somewhere you’ll love</h2>"
+            "<p>Compare the sample stays by star level, nightly price, and amenities.</p></div>",
+            unsafe_allow_html=True,
+        )
+        top_hotels = sorted(
+            hotel_records,
+            key=lambda item: (-int(item.get("stars", 0)), int(item.get("price_per_night", 0))),
+        )[:6]
+        if top_hotels:
+            for start in range(0, len(top_hotels), 3):
+                hotel_columns = st.columns(3)
+                for column, hotel in zip(hotel_columns, top_hotels[start:start + 3]):
+                    with column:
+                        _render_hotel_card(hotel)
+        else:
+            st.info("No stays are listed for this destination in the sample dataset.")
 
     provider_keys = {}
     gemini_key = _setting("GEMINI_API_KEY") or _setting("GOOGLE_API_KEY")
@@ -283,6 +469,19 @@ def main() -> None:
             st.caption(f"Provider: {provider_label} · Model: {selected_provider[2]}")
         else:
             st.caption("AI is optional. The planner works without a key. Add a free Gemini key to enable AI.")
+
+    st.markdown(
+        "<div id='planner' class='section-title'><h2>Plan your trip</h2>"
+        "<p>Set your dates, choose a budget, and turn the listings above into a day-by-day plan.</p></div>",
+        unsafe_allow_html=True,
+    )
+    if flight_range and flight_range[1] < date.today():
+        st.info(
+            f"The supplied flight schedule covers {flight_coverage} and contains only past dates. "
+            "Future trips may need a manual flight estimate."
+        )
+    elif flight_range:
+        st.caption(f"Flight sample dates in this project: {flight_coverage}.")
 
     origin_default = cities.index("Delhi") if "Delhi" in cities else 0
     with st.form("trip_request"):

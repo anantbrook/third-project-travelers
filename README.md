@@ -1,10 +1,10 @@
 # Agentic AI-Based Travel Planning Assistant
 
-A Streamlit trip planner built around the supplied flights, hotels, and places JSON files. It filters and ranks local records, requests a live weather forecast from Open-Meteo, estimates trip costs, and creates a 3-7 day itinerary. With a Gemini free-tier or OpenAI API key configured, a LangChain tool-calling agent assembles the itinerary. Without a key, the app still produces a deterministic plan from the same data.
+A Streamlit travel discovery and trip planning site built around the supplied flights, hotels, and places JSON files. The homepage offers destination search, photo-led city cards, sample place and stay listings, and a trip planner. It requests a live weather forecast from Open-Meteo, estimates trip costs, and creates a 3-7 day itinerary. With a Gemini free-tier or OpenAI API key configured, a LangChain tool-calling agent assembles the itinerary. Without a key, the app still produces a deterministic plan from the same data.
 
 ## Project contents
 
-- app.py: Streamlit user interface.
+- app.py: Streamlit travel discovery interface and trip planner.
 - travel_assistant/data.py: JSON loading, validation, and dataset search.
 - travel_assistant/weather.py: Open-Meteo daily forecast integration.
 - travel_assistant/planner.py: Budget calculations and non-LLM itinerary fallback.
@@ -31,6 +31,8 @@ The supplied flight records cover January through December 2025. They are histor
 
 Hotel prices and flight fares do not include a currency field. The interface assumes Indian rupees based on the project brief and labels that assumption. Hotel nights are estimated as trip length minus one. Food and local travel cost is an editable per-day estimate.
 
+The supplied places, hotel, and flight records are sample project data, not live listings, current fares, or traveller reviews. Destination photos are hosted by Unsplash and credited in the app; property photos are not part of the supplied data.
+
 The places dataset does not contain coordinates. Weather uses a small city-coordinate mapping for the eight cities present in the supplied files. Open-Meteo forecasts are available up to 16 days ahead; dates outside that window are clearly marked unavailable.
 
 This app provides recommendations only. It does not make reservations or purchases.
@@ -45,5 +47,9 @@ The optional agent uses LangChain's `create_agent` API and structured output. Ge
 - [LangChain tools](https://docs.langchain.com/oss/python/langchain/tools)
 - [Open-Meteo forecast API](https://open-meteo.com/en/docs)
 - [Streamlit API reference](https://docs.streamlit.io/develop/api-reference)
+- [Unsplash Goa destination photo](https://unsplash.com/s/photos/goa-beaches)
+- [Unsplash Jaipur destination photo](https://unsplash.com/photos/hawa-mahal-with-many-windows-Gow54BJA3tc)
+- [Unsplash Delhi destination photo](https://unsplash.com/photos/people-walking-on-brown-concrete-arch-during-daytime-_q0DyZcOlMY)
+- [Unsplash Mumbai destination photo](https://unsplash.com/photos/people-walking-near-white-concrete-building-under-blue-sky-during-daytime-xH43OxDSXYw)
 
 
