@@ -1,10 +1,12 @@
 # Agentic AI-Based Travel Planning Assistant
 
-A Streamlit travel discovery and trip planning site built around the supplied flights, hotels, and places JSON files. The homepage offers destination search, photo-led city cards, sample place and stay listings, and a trip planner. It requests a live weather forecast from Open-Meteo, estimates trip costs, and creates a 3-7 day itinerary. With a Gemini free-tier or OpenAI API key configured, a LangChain tool-calling agent assembles the itinerary. Without a key, the app still produces a deterministic plan from the same data.
+A multipage Streamlit travel discovery and trip planning site built around the supplied flights, hotels, and places JSON files. It has separate Discover, Things to do, Stays, and Plan a trip pages. Destination, category, star, and price filters update as they are changed. The planner requests a live weather forecast from Open-Meteo, estimates trip costs, and creates a 3-7 day itinerary. With a Gemini free-tier or OpenAI API key configured, a LangChain tool-calling agent assembles the itinerary. Without a key, the planner uses the deterministic fallback.
 
 ## Project contents
 
-- app.py: Streamlit travel discovery interface and trip planner.
+- app.py: Discover page and Streamlit entry point.
+- pages/: Separate attraction, stay, and trip planning pages.
+- travel_assistant/site.py: Shared navigation and listing components.
 - travel_assistant/data.py: JSON loading, validation, and dataset search.
 - travel_assistant/weather.py: Open-Meteo daily forecast integration.
 - travel_assistant/planner.py: Budget calculations and non-LLM itinerary fallback.
@@ -23,7 +25,7 @@ Or run the steps manually:
 4. Copy `.env.example` to `.env`. For the free Gemini API tier, get a key at [Google AI Studio](https://aistudio.google.com/apikey) and set `GEMINI_API_KEY`. The default model is `gemini-3.5-flash-lite`; change it with `GEMINI_MODEL`. OpenAI is also supported with `OPENAI_API_KEY` and `OPENAI_MODEL`.
 5. Start the app with `streamlit run app.py`.
 
-The planner works without an API key. In that mode, it uses deterministic filtering and ranking to build the day plan. Open-Meteo weather lookup does not need a key.
+The planner works without an API key. In that mode, it uses deterministic filtering and ranking to build the day plan. The AI checkbox remains available and explains when no key is connected; selecting it without a key still uses the standard planner. Open-Meteo weather lookup does not need a key.
 
 ## Data notes
 

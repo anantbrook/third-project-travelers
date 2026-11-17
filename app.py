@@ -24,6 +24,7 @@ from travel_assistant.data import (
     recommend_places,
 )
 from travel_assistant.planner import build_itinerary, calculate_budget, format_money
+from travel_assistant.site import render_site_header
 from travel_assistant.weather import get_weather_forecast
 
 
@@ -280,7 +281,7 @@ def _render_result(result: dict[str, Any]) -> None:
     )
 
 
-def main() -> None:
+def _render_home() -> None:
     st.markdown(
         "<style>"
         ":root{--primary-color:#07966a}.stApp{background:#f7f8f5;color:#1d2927}.block-container{max-width:1240px;padding-top:1rem;padding-bottom:4rem}"
@@ -318,10 +319,6 @@ def main() -> None:
         ".brand-mark{width:25px;height:25px;margin-right:.25rem}.site-nav{gap:.82rem;font-size:.72rem;max-width:calc(100vw - 120px);overflow-x:auto}"
         ".site-meta{display:none}.hero{min-height:300px;padding:1.5rem;border-radius:20px}.destination-card{height:210px}}"
         "</style>"
-        "<header class='site-header'><div class='brand'><span class='brand-mark'>✦</span>TRAILWISE</div>"
-        "<nav class='site-nav'><a href='#discover'>Discover</a><a href='#stays'>Stays</a>"
-        "<a href='#things'>Things to do</a><a href='#planner'>Plan a trip</a></nav>"
-        "<div class='site-meta'>INDIA&nbsp;&nbsp; · &nbsp;&nbsp;₹ INR</div></header>"
         "<section class='hero' id='discover'><div class='hero-copy'><div class='eyebrow'>GO A LITTLE FURTHER</div>"
         "<h1>Find your next<br>favorite place.</h1>"
         "<p>Discover memorable places to visit, stays for every kind of trip, and a plan that fits your budget.</p></div></section>",
@@ -351,27 +348,25 @@ def main() -> None:
         unsafe_allow_html=True,
     )
     city_options = ["All destinations", *cities]
-    with st.form("discovery_search"):
-        search_scope = st.radio(
-            "Browse",
-            ["Everything", "Things to do", "Stays"],
-            horizontal=True,
-            label_visibility="collapsed",
-            key="discovery_scope_input",
-        )
-        search_left, search_right = st.columns([3, 1])
-        search_city = search_left.selectbox(
-            "Destination",
-            city_options,
-            index=city_options.index(st.session_state.get("discovery_city", "All destinations")),
-            key="discovery_city_input",
-        )
-        search_submit = search_right.form_submit_button("Search", type="primary", width="stretch")
-    if search_submit:
-        st.session_state["discovery_scope"] = search_scope
-        st.session_state["discovery_city"] = search_city
-    active_scope = st.session_state.get("discovery_scope", st.session_state.get("discovery_scope_input", "Everything"))
-    active_city = st.session_state.get("discovery_city", st.session_state.get("discovery_city_input", "All destinations"))
+    search_scope = st.radio(
+        "Browse",
+        ["Everything", "Things to do", "Stays"],
+        horizontal=True,
+        label_visibility="collapsed",
+        key="discovery_scope_input",
+    )
+    search_city = st.selectbox(
+        "Destination",
+        city_options,
+        index=city_options.index(st.session_state.get("discovery_city", "All destinations")),
+        key="discovery_city_input",
+    )
+    st.caption("Browse filters update as soon as you change an option.")
+    st.session_state["discovery_scope"] = search_scope
+    st.session_state["discovery_city"] = search_city
+    st.session_state["browse_city"] = search_city
+    active_scope = search_scope
+    active_city = search_city
     place_records = [
         place for place in datasets["places"]
         if active_city == "All destinations" or place.get("city") == active_city
@@ -467,13 +462,18 @@ def main() -> None:
         use_agent = st.checkbox(
             "Use AI itinerary",
             value=bool(selected_provider),
-            disabled=not bool(selected_provider),
-            help="Add GEMINI_API_KEY in .env or Streamlit secrets to use Gemini's free tier.",
+            key="use_ai_itinerary_home",
+            help="Add GEMINI_API_KEY in .env or Streamlit Cloud Secrets to generate an AI itinerary.",
         )
         if selected_provider:
             st.caption(f"Provider: {provider_label} · Model: {selected_provider[2]}")
         else:
-            st.caption("AI is optional. The planner works without a key. Add a free Gemini key to enable AI.")
+            st.caption("No AI key is connected. The standard planner still works.")
+            with st.expander("Enable free Gemini AI"):
+                st.markdown("Create a key in [Google AI Studio](https://aistudio.google.com/apikey), then add this in Streamlit Cloud Secrets:")
+                st.code('GEMINI_API_KEY = "paste_your_key_here"', language="toml")
+        if use_agent and not selected_provider:
+            st.warning("AI is not connected yet. This plan will use the standard planner until a key is added.")
 
     st.markdown(
         "<div id='planner' class='section-title'><h2>Plan your trip</h2>"
@@ -637,6 +637,18 @@ def main() -> None:
 
     if st.session_state.get("trip_result"):
         _render_result(st.session_state["trip_result"])
+
+
+def main() -> None:
+    pages = {
+        "discover": st.Page(_render_home, title="Discover", url_path="discover", default=True),
+        "things": st.Page("pages/1_Things_to_do.py", title="Things to do", url_path="things-to-do"),
+        "stays": st.Page("pages/2_Stays.py", title="Stays", url_path="stays"),
+        "plan": st.Page("pages/3_Plan_your_trip.py", title="Plan a trip", url_path="plan-a-trip"),
+    }
+    selected_page = st.navigation(list(pages.values()), position="top")
+    render_site_header()
+    selected_page.run()
 
 
 if __name__ == "__main__":
