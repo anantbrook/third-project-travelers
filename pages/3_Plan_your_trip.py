@@ -109,7 +109,10 @@ with st.form("standalone_trip_request"):
     origin_default = cities.index("Delhi") if "Delhi" in cities else 0
     origin = route_left.selectbox("Starting city", cities, index=origin_default)
     destinations = [city for city in cities if city != origin]
-    destination_default = destinations.index("Goa") if "Goa" in destinations else 0
+    browse_city = st.session_state.get("browse_city")
+    if browse_city not in destinations:
+        browse_city = "Goa" if "Goa" in destinations else destinations[0]
+    destination_default = destinations.index(browse_city)
     destination = route_right.selectbox("Destination", destinations, index=destination_default)
 
     date_col, duration_col = st.columns(2)

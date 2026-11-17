@@ -284,40 +284,38 @@ def _render_result(result: dict[str, Any]) -> None:
 def _render_home() -> None:
     st.markdown(
         "<style>"
-        ":root{--primary-color:#07966a}.stApp{background:#f7f8f5;color:#1d2927}.block-container{max-width:1240px;padding-top:1rem;padding-bottom:4rem}"
-        "[data-testid='stHeader']{background:transparent} [data-testid='stSidebar']{background:#f0f3ed;border-right:1px solid #e2e9e2}"
-        ".site-header{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.2rem .15rem 1.15rem;color:#183b36}"
-        ".brand{font-size:1.4rem;font-weight:850;letter-spacing:-.04em}.brand-mark{display:inline-grid;place-items:center;"
-        "width:30px;height:30px;margin-right:.42rem;border-radius:10px;background:#00aa75;color:white;font-size:1rem}"
-        ".site-nav{display:flex;gap:1.5rem;font-size:.92rem;font-weight:650}.site-nav a{color:#294642;text-decoration:none}"
-        ".site-meta{color:#56716a;font-size:.85rem;font-weight:650}"
+        ".block-container{width:100%;max-width:1240px;box-sizing:border-box;margin-inline:auto;padding:1rem clamp(1rem,3vw,2.5rem) 4rem}"
+        "[data-testid='stHeader']{background:transparent}"
+        ".site-header{display:flex;align-items:center;justify-content:flex-start;padding:.2rem 0 .8rem;color:inherit}"
+        ".brand{display:flex;align-items:center;gap:.45rem;font-size:1.4rem;font-weight:850;letter-spacing:-.04em;white-space:nowrap}.brand-mark{display:inline-grid;place-items:center;"
+        "width:30px;height:30px;border-radius:10px;background:#00aa75;color:white;font-size:1rem}"
         ".hero{position:relative;isolation:isolate;display:flex;align-items:flex-end;min-height:340px;overflow:hidden;"
         "padding:2.4rem 2.8rem;border-radius:28px;color:#fff;background-image:linear-gradient(90deg,rgba(8,38,40,.82),rgba(8,38,40,.18)),"
         f"url('{HERO_PHOTO}');background-position:center 53%;background-size:cover;box-shadow:0 18px 45px rgba(22,54,47,.16)}}"
         ".hero-copy{max-width:690px}.eyebrow{font-size:.75rem;letter-spacing:.15em;font-weight:800;color:#d5f4df}"
         ".hero h1{font-size:clamp(2.35rem,5vw,4.2rem);line-height:1.02;letter-spacing:-.055em;margin:.65rem 0 1rem;color:#fff}"
         ".hero p{font-size:1.08rem;max-width:590px;line-height:1.55;color:#eef6f1;margin:0}"
-        ".section-title{margin:2.35rem 0 1rem}.section-title h2{font-size:1.75rem;letter-spacing:-.04em;color:#1b302c;margin:0}"
-        ".section-title p{color:#6b7e78;margin:.35rem 0 0}.destination-card{height:250px;position:relative;overflow:hidden;"
+        ".section-title{margin:2.1rem 0 1rem}.section-title h2{font-size:1.75rem;letter-spacing:-.04em;color:inherit;margin:0}"
+        ".section-title p{color:inherit;opacity:.72;margin:.35rem 0 0}.destination-card{height:250px;position:relative;overflow:hidden;"
         "border-radius:20px;background:#dce9df;box-shadow:0 8px 24px rgba(29,55,47,.1);transition:transform .2s ease}"
         ".destination-card:hover{transform:translateY(-4px)}.destination-card img{width:100%;height:100%;object-fit:cover;display:block}"
         ".destination-shade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(11,31,31,.78))}"
         ".destination-copy{position:absolute;left:1rem;right:1rem;bottom:1rem;color:white}.destination-copy span{font-size:.65rem;letter-spacing:.13em;font-weight:800;opacity:.85}"
         ".destination-copy h3{font-size:1.55rem;margin:.2rem 0;color:white}.destination-copy p{font-size:.77rem;margin:0;color:#f1f5f1}"
-        ".listing-card{min-height:170px;height:auto;box-sizing:border-box;padding:1.1rem 1.15rem;border:1px solid #e2e8e1;border-radius:18px;background:#fff;"
-        "box-shadow:0 5px 18px rgba(26,56,47,.045);margin-bottom:.7rem}.listing-kicker{color:#16875f;font-size:.72rem;font-weight:800;"
-        "letter-spacing:.07em;text-transform:uppercase}.listing-card h3{font-size:1.08rem;line-height:1.2;color:#253b36;margin:.55rem 0 .25rem}"
-        ".listing-city,.amenities{color:#74837e;font-size:.82rem;margin:0}.listing-rating{display:flex;align-items:center;gap:.42rem;margin-top:.85rem;"
-        "font-size:.77rem;color:#7b8983}.listing-rating strong{color:#253b36}.rating-dot{display:inline-grid;place-items:center;"
+        ".listing-card{min-width:0;min-height:170px;height:auto;box-sizing:border-box;padding:1.1rem 1.15rem;border:1px solid rgba(128,144,133,.28);"
+        "border-radius:18px;background:color-mix(in srgb,currentColor 5%,transparent);color:inherit;"
+        "box-shadow:0 5px 18px rgba(0,0,0,.06);margin-bottom:.7rem}.listing-kicker{color:inherit;font-size:.72rem;font-weight:800;"
+        "letter-spacing:.07em;text-transform:uppercase}.listing-card h3{font-size:1.08rem;line-height:1.2;color:inherit;margin:.55rem 0 .25rem}"
+        ".listing-city,.amenities{color:inherit;opacity:.72;font-size:.82rem;margin:0}.listing-rating{display:flex;align-items:center;gap:.42rem;margin-top:.85rem;"
+        "font-size:.77rem;color:inherit;opacity:.78}.listing-rating strong{color:inherit}.rating-dot{display:inline-grid;place-items:center;"
         "width:21px;height:21px;border-radius:50%;background:#00aa75;color:white;font-size:.72rem}.stay-card{min-height:205px;height:auto}"
-        ".stay-price{margin-top:.65rem;color:#213933;font-weight:800;font-size:1rem;white-space:nowrap}.stay-price span{font-size:.76rem;font-weight:500;color:#7b8983}"
-        ".photo-note{color:#87928d;font-size:.7rem;margin-top:.6rem}.data-note{padding:.8rem 1rem;border-radius:12px;"
-        "background:#eef4ed;border:1px solid #dfe9df;color:#5c7168;font-size:.78rem}"
-        "div[data-testid='stForm']{border:1px solid #e3e9e2;background:#fff;border-radius:20px;padding:1rem 1.2rem}"
-        "div[data-testid='stFormSubmitButton'] button,div.stButton button[kind='primary']{border-radius:12px;font-weight:750;background:#07966a!important;border-color:#07966a!important;color:#fff!important}"
-        "@media(max-width:700px){.site-header{gap:.35rem;align-items:flex-start;flex-wrap:wrap}.brand{font-size:1.15rem;white-space:nowrap;flex:0 0 100%}"
-        ".brand-mark{width:25px;height:25px;margin-right:.25rem}.site-nav{gap:.82rem;font-size:.72rem;max-width:calc(100vw - 120px);overflow-x:auto}"
-        ".site-meta{display:none}.hero{min-height:300px;padding:1.5rem;border-radius:20px}.destination-card{height:210px}}"
+        ".stay-price{margin-top:.65rem;color:inherit;font-weight:800;font-size:1rem;white-space:nowrap}.stay-price span{font-size:.76rem;font-weight:500;opacity:.72}"
+        ".photo-note{color:inherit;opacity:.64;font-size:.7rem;margin-top:.6rem}.data-note{padding:.8rem 1rem;border-radius:12px;"
+        "background:color-mix(in srgb,currentColor 5%,transparent);border:1px solid rgba(128,144,133,.36);color:inherit;font-size:.78rem}"
+        "div[data-testid='stForm']{border:1px solid rgba(128,144,133,.38);background:color-mix(in srgb,currentColor 4%,transparent);border-radius:20px;padding:1rem 1.2rem}"
+        "div[data-testid='stFormSubmitButton'] button,div.stButton button[kind='primary']{border-radius:12px;font-weight:750;background:#087a5b!important;border-color:#087a5b!important;color:#fff!important}"
+        "@media(max-width:800px){.block-container{padding:.75rem 1rem 3rem!important}.hero{min-height:300px;padding:1.5rem;border-radius:20px}"
+        ".destination-card{height:210px}.section-title{margin-top:1.5rem}}"
         "</style>"
         "<section class='hero' id='discover'><div class='hero-copy'><div class='eyebrow'>GO A LITTLE FURTHER</div>"
         "<h1>Find your next<br>favorite place.</h1>"
@@ -493,7 +491,10 @@ def _render_home() -> None:
         route_left, route_right = st.columns(2)
         origin = route_left.selectbox("Starting city", cities, index=origin_default)
         destination_options = [city for city in cities if city != origin]
-        default_destination = destination_options.index("Goa") if "Goa" in destination_options else 0
+        suggested_destination = st.session_state.get("browse_city")
+        if suggested_destination not in destination_options:
+            suggested_destination = "Goa" if "Goa" in destination_options else destination_options[0]
+        default_destination = destination_options.index(suggested_destination)
         destination = route_right.selectbox("Destination", destination_options, index=default_destination)
 
         date_column, duration_column = st.columns(2)

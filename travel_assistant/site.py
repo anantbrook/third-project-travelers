@@ -12,16 +12,17 @@ def render_site_header() -> None:
     """Render the shared brand beneath Streamlit's multipage navigation."""
     st.markdown(
         "<style>"
-        ".site-header{font-size:1.35rem;font-weight:850;letter-spacing:-.04em;white-space:nowrap;color:#183b36;padding:.25rem 0 1rem}"
-        ".brand-mark{display:inline-grid;place-items:center;width:30px;height:30px;margin-right:.42rem;"
+        ".site-header{display:flex;align-items:center;justify-content:flex-start;font-size:1.35rem;"
+        "font-weight:850;letter-spacing:-.04em;white-space:nowrap;color:inherit;padding:.25rem 0 .8rem}"
+        ".brand{display:flex;align-items:center;gap:.45rem}"
+        ".brand-mark{display:inline-grid;place-items:center;width:30px;height:30px;"
         "border-radius:10px;background:#00aa75;color:white;font-size:1rem}"
-        "@media(max-width:700px){.site-header{font-size:1rem}.brand-mark{width:25px;height:25px;margin-right:.25rem}"
-        ".site-header{padding-bottom:.55rem}}"
+        "@media(max-width:800px){.site-header{font-size:1.08rem;padding-bottom:.5rem}.brand-mark{width:25px;height:25px}}"
         "</style>",
         unsafe_allow_html=True,
     )
     st.markdown(
-        "<header class='site-header'><span class='brand-mark'>✦</span>TRAILWISE</header>",
+        "<header class='site-header'><div class='brand'><span class='brand-mark'>✦</span><span>TRAILWISE</span></div></header>",
         unsafe_allow_html=True,
     )
 
@@ -59,20 +60,31 @@ def render_hotel_card(hotel: dict[str, Any]) -> None:
 def render_listing_styles() -> None:
     st.markdown(
         "<style>"
-        ".stApp{background:#f7f8f5;color:#1d2927}.block-container{max-width:1240px;padding-top:1rem;padding-bottom:4rem}"
-        "[data-testid='stHeader']{background:transparent}[data-testid='stSidebar']{background:#f0f3ed}"
-        ".section-title{margin:2rem 0 1rem}.section-title h2{font-size:1.75rem;letter-spacing:-.04em;color:#1b302c;margin:0}"
-        ".listing-card{min-height:170px;height:auto;box-sizing:border-box;padding:1.1rem 1.15rem;border:1px solid #e2e8e1;"
-        "border-radius:18px;background:#fff;box-shadow:0 5px 18px rgba(26,56,47,.045);margin-bottom:.7rem}"
-        ".listing-kicker{color:#16875f;font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase}"
-        ".listing-card h3{font-size:1.08rem;line-height:1.2;color:#253b36;margin:.55rem 0 .25rem}"
-        ".listing-city,.amenities{color:#74837e;font-size:.82rem;margin:0}"
-        ".listing-rating{display:flex;align-items:center;gap:.42rem;margin-top:.85rem;font-size:.77rem;color:#7b8983}"
-        ".listing-rating strong{color:#253b36}.rating-dot{display:inline-grid;place-items:center;width:21px;height:21px;"
-        "border-radius:50%;background:#00aa75;color:white;font-size:.72rem}"
-        ".stay-card{min-height:205px;height:auto}.stay-price{margin-top:.65rem;color:#213933;font-weight:800;font-size:1rem;white-space:nowrap}"
-        ".stay-price span{font-size:.76rem;font-weight:500;color:#7b8983}"
-        ".data-note{padding:.8rem 1rem;border-radius:12px;background:#eef4ed;border:1px solid #dfe9df;color:#5c7168;font-size:.78rem}"
+        ".block-container{width:100%;max-width:1240px;box-sizing:border-box;margin-inline:auto;"
+        "padding:1rem clamp(1rem,3vw,2.5rem) 4rem}"
+        "[data-testid='stHeader']{background:transparent}"
+        ".section-title{margin:1.7rem 0 1rem}.section-title h2{font-size:1.75rem;letter-spacing:-.04em;"
+        "color:inherit;margin:0}"
+        ".listing-card{min-width:0;min-height:170px;height:auto;box-sizing:border-box;padding:1.1rem 1.15rem;"
+        "border:1px solid rgba(128,144,133,.28);border-radius:18px;"
+        "background:color-mix(in srgb,currentColor 5%,transparent);color:inherit;"
+        "box-shadow:0 5px 18px rgba(0,0,0,.06);margin-bottom:.7rem}"
+        ".listing-kicker{color:inherit;font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase}"
+        ".listing-card h3{font-size:1.08rem;line-height:1.2;color:inherit;margin:.55rem 0 .25rem}"
+        ".listing-city,.amenities{color:inherit;opacity:.72;font-size:.82rem;margin:0}"
+        ".listing-rating{display:flex;align-items:center;gap:.42rem;margin-top:.85rem;font-size:.77rem;"
+        "color:inherit;opacity:.78}"
+        ".listing-rating strong{color:inherit;opacity:1}"
+        ".rating-dot{display:inline-grid;place-items:center;width:21px;height:21px;border-radius:50%;"
+        "background:#087a5b;color:white;font-size:.72rem}"
+        ".stay-card{min-height:205px;height:auto}.stay-price{margin-top:.65rem;color:inherit;font-weight:800;font-size:1rem;white-space:nowrap}"
+        ".stay-price span{font-size:.76rem;font-weight:500;opacity:.72}"
+        ".data-note{padding:.8rem 1rem;border-radius:12px;background:color-mix(in srgb,currentColor 5%,transparent);"
+        "border:1px solid rgba(128,144,133,.36);color:inherit;font-size:.78rem}"
+        "@media(max-width:800px){.block-container{padding:.75rem 1rem 3rem!important}"
+        "[data-testid='stHorizontalBlock']{display:flex!important;flex-wrap:wrap!important;gap:.65rem!important}"
+        "[data-testid='stHorizontalBlock']>[data-testid='stColumn']{flex:1 1 100%!important;"
+        "width:100%!important;min-width:0!important;max-width:100%!important}}"
         "</style>",
         unsafe_allow_html=True,
     )
