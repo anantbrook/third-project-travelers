@@ -33,6 +33,7 @@ class TripPlan(BaseModel):
 
 def create_agent_plan(
     *,
+    provider: str,
     api_key: str,
     model_name: str,
     origin: str,
@@ -50,7 +51,22 @@ def create_agent_plan(
     """Ask a LangChain agent to call the travel tools and return a typed plan."""
     from langchain.agents import create_agent
     from langchain.tools import tool
-    from langchain_openai import ChatOpenAI
+
+    if provider == "gemini":
+        from langchain_google_genai import ChatGoogleGenerativeAI
+
+        model = ChatGoogleGenerativeAI(
+            model=model_name,
+            api_key=api_key,
+            timeout=35,
+            max_retries=1,
+        )
+    elif provider == "openai":
+        from langchain_openai import ChatOpenAI
+
+        model = ChatOpenAI(model=model_name, temperature=0, api_key=api_key, timeout=35, max_retries=1)
+    else:
+        raise ValueError("Unsupported AI provider.")
 
     @tool
     def search_flights(origin_city: str, destination_city: str, travel_date: str) -> str:
@@ -120,7 +136,6 @@ def create_agent_plan(
         "If a forecast is unavailable, state that plainly. Return a practical day-wise schedule and short evidence-based reasons; do not provide hidden chain-of-thought. "
         "This application recommends options and does not book travel."
     )
-    model = ChatOpenAI(model=model_name, temperature=0, api_key=api_key, timeout=35, max_retries=1)
     agent = create_agent(model=model, tools=tools, system_prompt=system_prompt, response_format=TripPlan)
     request = (
         f"Plan a {trip_days}-day trip from {origin} to {destination}, starting {start_date.isoformat()}. "

@@ -1,6 +1,6 @@
 # Agentic AI-Based Travel Planning Assistant
 
-A Streamlit trip planner built around the supplied flights, hotels, and places JSON files. It filters and ranks local records, requests a live weather forecast from Open-Meteo, estimates trip costs, and creates a 3-7 day itinerary. With an OpenAI API key configured, a LangChain tool-calling agent assembles the itinerary. Without a key, the app still produces a deterministic plan from the same data.
+A Streamlit trip planner built around the supplied flights, hotels, and places JSON files. It filters and ranks local records, requests a live weather forecast from Open-Meteo, estimates trip costs, and creates a 3-7 day itinerary. With a Gemini free-tier or OpenAI API key configured, a LangChain tool-calling agent assembles the itinerary. Without a key, the app still produces a deterministic plan from the same data.
 
 ## Project contents
 
@@ -20,7 +20,7 @@ Or run the steps manually:
 1. Use Python 3.10 or newer.
 2. Create and activate a virtual environment.
 3. Install dependencies with `python -m pip install -r requirements.txt`.
-4. Copy `.env.example` to `.env` and set `OPENAI_API_KEY` to enable the AI agent. The model can be changed with `OPENAI_MODEL`.
+4. Copy `.env.example` to `.env`. For the free Gemini API tier, get a key at [Google AI Studio](https://aistudio.google.com/apikey) and set `GEMINI_API_KEY`. The default model is `gemini-3.5-flash-lite`; change it with `GEMINI_MODEL`. OpenAI is also supported with `OPENAI_API_KEY` and `OPENAI_MODEL`.
 5. Start the app with `streamlit run app.py`.
 
 The planner works without an API key. In that mode, it uses deterministic filtering and ranking to build the day plan. Open-Meteo weather lookup does not need a key.
@@ -37,7 +37,7 @@ This app provides recommendations only. It does not make reservations or purchas
 
 ## Configuration
 
-The optional agent uses LangChain's `create_agent` API and structured output. Set an API key and a model supported by your OpenAI account in `.env`. Do not commit `.env` or put API keys in source files.
+The optional agent uses LangChain's `create_agent` API and structured output. Gemini's free tier has provider-set usage limits, and Google may use free-tier prompts to improve its products. For Streamlit Community Cloud, add `GEMINI_API_KEY` in the app's Secrets settings. Do not commit `.env` or put API keys in source files.
 
 ## Documentation
 

@@ -30,6 +30,15 @@ load_dotenv()
 st.set_page_config(page_title="Travel Planner", page_icon="🧭", layout="wide")
 
 
+def _setting(name: str) -> str:
+    """Read a setting from Streamlit Cloud secrets or a local environment file."""
+    try:
+        value = st.secrets.get(name, "")
+    except Exception:
+        value = ""
+    return str(value or os.getenv(name, "")).strip()
+
+
 @st.cache_data(show_spinner=False)
 def cached_datasets() -> dict[str, list[dict[str, Any]]]:
     return load_datasets()
@@ -95,13 +104,17 @@ def _render_result(result: dict[str, Any]) -> None:
     st.caption(budget["currency"] + ". " + budget["note"])
 
     if result["agent_plan"]:
-        st.success("Itinerary assembled with the LangChain tool-calling agent.")
+        provider_name = result.get("agent_provider") or "LangChain"
+        st.success(f"Itinerary assembled with the {provider_name} AI tool-calling agent.")
         agent_plan = result["agent_plan"]
         st.subheader("Trip overview")
         st.write(agent_plan.get("summary", ""))
         itinerary = agent_plan.get("days", [])
     else:
-        st.info("Showing a data-grounded itinerary. Add an OpenAI API key to enable LangChain agent tool-calling.")
+        st.info(
+            "Showing a data-grounded itinerary. Add a free Gemini API key in Streamlit secrets "
+            "to enable the AI itinerary. [Get a Gemini API key](https://aistudio.google.com/apikey)."
+        )
         itinerary = result["itinerary"]
     if result["reasons"]:
         st.write("**Why these options**")
@@ -238,20 +251,38 @@ def main() -> None:
     else:
         flight_coverage = "no valid departure dates"
 
-    api_key = os.getenv("OPENAI_API_KEY", "").strip()
-    model_name = os.getenv("OPENAI_MODEL", "gpt-6-luna").strip() or "gpt-6-luna"
+    provider_keys = {}
+    gemini_key = _setting("GEMINI_API_KEY") or _setting("GOOGLE_API_KEY")
+    openai_key = _setting("OPENAI_API_KEY")
+    if gemini_key:
+        provider_keys["Gemini (free tier)"] = (
+            "gemini",
+            gemini_key,
+            _setting("GEMINI_MODEL") or "gemini-3.5-flash-lite",
+        )
+    if openai_key:
+        provider_keys["OpenAI"] = (
+            "openai",
+            openai_key,
+            _setting("OPENAI_MODEL") or "gpt-6-luna",
+        )
     with st.sidebar:
         st.header("Trip settings")
-        use_agent = st.checkbox(
-            "Use LangChain AI itinerary",
-            value=bool(api_key),
-            disabled=not bool(api_key),
-            help="Set OPENAI_API_KEY in your .env file to enable the tool-calling agent.",
-        )
-        if api_key:
-            st.caption(f"Agent model: {model_name}")
+        if len(provider_keys) > 1:
+            provider_label = st.selectbox("AI provider", list(provider_keys))
         else:
-            st.caption("AI is optional. The planner works with deterministic recommendations without an API key.")
+            provider_label = next(iter(provider_keys), "")
+        selected_provider = provider_keys.get(provider_label)
+        use_agent = st.checkbox(
+            "Use AI itinerary",
+            value=bool(selected_provider),
+            disabled=not bool(selected_provider),
+            help="Add GEMINI_API_KEY in .env or Streamlit secrets to use Gemini's free tier.",
+        )
+        if selected_provider:
+            st.caption(f"Provider: {provider_label} · Model: {selected_provider[2]}")
+        else:
+            st.caption("AI is optional. The planner works without a key. Add a free Gemini key to enable AI.")
 
     origin_default = cities.index("Delhi") if "Delhi" in cities else 0
     with st.form("trip_request"):
@@ -305,9 +336,12 @@ def main() -> None:
 
         agent_plan = None
         agent_error = None
-        if use_agent and api_key:
+        agent_provider_name = provider_label if selected_provider else ""
+        if use_agent and selected_provider:
+            provider, api_key, model_name = selected_provider
             try:
                 agent_plan = create_agent_plan(
+                    provider=provider,
                     api_key=api_key,
                     model_name=model_name,
                     origin=origin,
@@ -390,6 +424,7 @@ def main() -> None:
             "budget": budget,
             "itinerary": fallback_itinerary,
             "agent_plan": agent_plan,
+            "agent_provider": agent_provider_name,
             "agent_error": agent_error,
             "reasons": reasons,
             "flight_coverage": flight_coverage,
