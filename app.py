@@ -49,7 +49,12 @@ HERO_PHOTO = "https://images.unsplash.com/photo-1523979934836-981ca2ded72f?auto=
 
 
 load_dotenv()
-st.set_page_config(page_title="Trailwise | India Travel Guide", page_icon="🧭", layout="wide")
+st.set_page_config(
+    page_title="Trailwise | India Travel Guide",
+    page_icon="🧭",
+    layout="wide",
+    initial_sidebar_state="collapsed",
+)
 
 
 def _setting(name: str) -> str:
