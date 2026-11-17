@@ -7,6 +7,8 @@ from typing import Any
 
 import streamlit as st
 
+from .photos import hotel_photo, place_photo
+
 
 def render_site_header() -> None:
     """Render the shared brand beneath Streamlit's multipage navigation."""
@@ -32,11 +34,16 @@ def render_place_card(place: dict[str, Any]) -> None:
     city = html.escape(str(place.get("city", "")))
     category = html.escape(str(place.get("type", "place")).title())
     rating = html.escape(str(place.get("rating", "—")))
+    photo = place_photo(place)
     st.markdown(
-        f"<article class='listing-card'><div class='listing-kicker'>{category}</div>"
+        f"<article class='listing-card'><div class='listing-photo'>"
+        f"<a href='{photo['credit']}' target='_blank' rel='noreferrer' aria-label='Illustrative photo source for {title}'>"
+        f"<img src='{photo['url']}' alt='Illustrative {category.lower()} photo for {title} in {city}' loading='lazy' decoding='async'>"
+        "<span class='photo-credit'>Illustrative photo · Unsplash ↗</span></a></div>"
+        f"<div class='listing-content'><div class='listing-kicker'>{category}</div>"
         f"<h3>{title}</h3><p class='listing-city'>{city}, India</p>"
         f"<div class='listing-rating'><span class='rating-dot'>★</span><strong>{rating}</strong>"
-        "<span>sample dataset rating</span></div></article>",
+        "<span>sample dataset rating</span></div></div></article>",
         unsafe_allow_html=True,
     )
 
@@ -51,11 +58,16 @@ def render_hotel_card(hotel: dict[str, Any]) -> None:
         amenities_data = []
     amenities = ", ".join(str(item).title() for item in amenities_data[:3])
     amenities = html.escape(amenities or "Details not listed")
+    photo = hotel_photo(hotel)
     st.markdown(
-        f"<article class='listing-card stay-card'><div class='listing-kicker'>{'★' * stars} stay</div>"
+        f"<article class='listing-card stay-card'><div class='listing-photo'>"
+        f"<a href='{photo['credit']}' target='_blank' rel='noreferrer' aria-label='Illustrative photo source for {title}'>"
+        f"<img src='{photo['url']}' alt='Illustrative accommodation photo for {title} in {city}' loading='lazy' decoding='async'>"
+        "<span class='photo-credit'>Illustrative photo · Unsplash ↗</span></a></div>"
+        f"<div class='listing-content'><div class='listing-kicker'>{'★' * stars} stay</div>"
         f"<h3>{title}</h3><p class='listing-city'>{city}, India</p>"
         f"<p class='amenities'>{amenities}</p><div class='stay-price'>₹{price:,}"
-        "<span> / night · sample price</span></div></article>",
+        "<span> / night · sample price</span></div></div></article>",
         unsafe_allow_html=True,
     )
 
@@ -75,10 +87,17 @@ def render_listing_styles() -> None:
         "[data-testid='stHeader']{background:transparent}"
         ".section-title{margin:1.7rem 0 1rem}.section-title h2{font-size:1.75rem;letter-spacing:-.04em;"
         "color:inherit;margin:0}"
-        ".listing-card{min-width:0;min-height:170px;height:auto;box-sizing:border-box;padding:1.1rem 1.15rem;"
-        "border:1px solid rgba(128,144,133,.28);border-radius:18px;"
+        ".listing-card{display:flex;flex-direction:column;min-width:0;min-height:0;height:100%;box-sizing:border-box;"
+        "border:1px solid rgba(128,144,133,.28);border-radius:18px;overflow:hidden;"
         "background:var(--secondary-background-color,rgba(128,144,133,.07));color:var(--text-color,inherit);"
         "box-shadow:0 5px 18px rgba(0,0,0,.06);margin-bottom:.7rem}"
+        ".listing-photo{position:relative;display:block;flex:none;height:180px;overflow:hidden;background:#dce9df}"
+        ".listing-photo>a{display:block;width:100%;height:100%;position:relative}"
+        ".listing-photo img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .25s ease}"
+        ".listing-photo a:hover img{transform:scale(1.035)}"
+        ".photo-credit{position:absolute;right:.65rem;bottom:.65rem;padding:.3rem .5rem;border-radius:999px;"
+        "background:rgba(14,28,25,.78);color:#fff;font-size:.68rem;line-height:1.2}"
+        ".listing-content{min-width:0;flex:1;padding:.95rem 1.1rem 1.1rem}"
         ".listing-kicker{color:inherit;font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase}"
         ".listing-card h3{font-size:1.08rem;line-height:1.2;color:inherit;margin:.55rem 0 .25rem}"
         ".listing-city,.amenities{color:inherit;opacity:.72;font-size:.82rem;margin:0}"
@@ -87,11 +106,12 @@ def render_listing_styles() -> None:
         ".listing-rating strong{color:inherit;opacity:1}"
         ".rating-dot{display:inline-grid;place-items:center;width:21px;height:21px;border-radius:50%;"
         "background:#087a5b;color:white;font-size:.72rem}"
-        ".stay-card{min-height:205px;height:auto}.stay-price{margin-top:.65rem;color:inherit;font-weight:800;font-size:1rem;white-space:nowrap}"
+        ".stay-card{min-height:0;height:100%}.stay-price{margin-top:.65rem;color:inherit;font-weight:800;font-size:1rem;white-space:nowrap}"
         ".stay-price span{font-size:.76rem;font-weight:500;opacity:.72}"
         ".data-note{padding:.8rem 1rem;border-radius:12px;background:var(--secondary-background-color,rgba(128,144,133,.07));"
         "border:1px solid rgba(128,144,133,.36);color:var(--text-color,inherit);font-size:.78rem}"
         "@media(max-width:800px){.block-container{padding:.75rem 1rem 3rem!important}"
+        ".listing-photo{height:160px}"
         "[data-testid='stHorizontalBlock']{display:flex!important;flex-wrap:wrap!important;gap:.65rem!important}"
         "[data-testid='stHorizontalBlock']>[data-testid='stColumn']{flex:1 1 100%!important;"
         "width:100%!important;min-width:0!important;max-width:100%!important}}"

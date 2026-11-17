@@ -8,28 +8,8 @@ import streamlit as st
 
 from travel_assistant.cache import get_cached_datasets
 from travel_assistant.data import DatasetError, list_cities
-from travel_assistant.site import render_hotel_card, render_place_card, render_site_header
-
-
-CITY_PHOTOS = {
-    "Delhi": {
-        "url": "https://images.unsplash.com/photo-1609258678760-ba05d9b95bb9?auto=format&fit=crop&w=1100&q=85",
-        "credit": "https://unsplash.com/photos/people-walking-on-brown-concrete-arch-during-daytime-_q0DyZcOlMY",
-    },
-    "Goa": {
-        "url": "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=1100&q=85",
-        "credit": "https://unsplash.com/s/photos/goa-beaches",
-    },
-    "Jaipur": {
-        "url": "https://images.unsplash.com/photo-1578999935853-4ec5fa6c1f60?auto=format&fit=crop&w=1100&q=85",
-        "credit": "https://unsplash.com/photos/hawa-mahal-with-many-windows-Gow54BJA3tc",
-    },
-    "Mumbai": {
-        "url": "https://images.unsplash.com/photo-1625731226721-b4d51ae70e20?auto=format&fit=crop&w=1100&q=85",
-        "credit": "https://unsplash.com/photos/people-walking-near-white-concrete-building-under-blue-sky-during-daytime-xH43OxDSXYw",
-    },
-}
-HERO_PHOTO = "https://images.unsplash.com/photo-1523979934836-981ca2ded72f?auto=format&fit=crop&w=2000&q=90"
+from travel_assistant.photos import HERO_PHOTO, LOCATION_PHOTOS
+from travel_assistant.site import render_hotel_card, render_listing_styles, render_place_card, render_site_header
 
 
 st.set_page_config(
@@ -41,7 +21,7 @@ st.set_page_config(
 
 
 def _render_city_card(city: str, places_count: int, hotels_count: int) -> None:
-    photo = CITY_PHOTOS.get(city)
+    photo = LOCATION_PHOTOS.get(city)
     if not photo:
         return
     safe_city = html.escape(city)
@@ -55,6 +35,7 @@ def _render_city_card(city: str, places_count: int, hotels_count: int) -> None:
 
 
 def _render_home() -> None:
+    render_listing_styles()
     st.markdown(
         "<style>"
         ".block-container{width:100%;max-width:1240px;box-sizing:border-box;margin-inline:auto;padding:1rem clamp(1rem,3vw,2.5rem) 4rem}"
@@ -64,7 +45,7 @@ def _render_home() -> None:
         "width:30px;height:30px;border-radius:10px;background:#00aa75;color:white;font-size:1rem}"
         ".hero{position:relative;isolation:isolate;display:flex;align-items:flex-end;min-height:340px;overflow:hidden;"
         "padding:2.4rem 2.8rem;border-radius:28px;color:#fff;background-image:linear-gradient(90deg,rgba(8,38,40,.82),rgba(8,38,40,.18)),"
-        f"url('{HERO_PHOTO}');background-position:center 53%;background-size:cover;box-shadow:0 18px 45px rgba(22,54,47,.16)}}"
+        f"url('{HERO_PHOTO['url']}');background-position:center 53%;background-size:cover;box-shadow:0 18px 45px rgba(22,54,47,.16)}}"
         ".hero-copy{max-width:690px}.eyebrow{font-size:.75rem;letter-spacing:.15em;font-weight:800;color:#d5f4df}"
         ".hero h1{font-size:clamp(2.35rem,5vw,4.2rem);line-height:1.02;letter-spacing:-.055em;margin:.65rem 0 1rem;color:#fff}"
         ".hero p{font-size:1.08rem;max-width:590px;line-height:1.55;color:#eef6f1;margin:0}"
@@ -75,16 +56,7 @@ def _render_home() -> None:
         ".destination-shade{position:absolute;inset:0;background:linear-gradient(180deg,transparent 30%,rgba(11,31,31,.78))}"
         ".destination-copy{position:absolute;left:1rem;right:1rem;bottom:1rem;color:white}.destination-copy span{font-size:.65rem;letter-spacing:.13em;font-weight:800;opacity:.85}"
         ".destination-copy h3{font-size:1.55rem;margin:.2rem 0;color:white}.destination-copy p{font-size:.77rem;margin:0;color:#f1f5f1}"
-        ".listing-card{min-width:0;min-height:170px;height:auto;box-sizing:border-box;padding:1.1rem 1.15rem;border:1px solid rgba(128,144,133,.28);"
-        "border-radius:18px;background:var(--secondary-background-color,rgba(128,144,133,.07));color:var(--text-color,inherit);"
-        "box-shadow:0 5px 18px rgba(0,0,0,.06);margin-bottom:.7rem}.listing-kicker{color:inherit;font-size:.72rem;font-weight:800;"
-        "letter-spacing:.07em;text-transform:uppercase}.listing-card h3{font-size:1.08rem;line-height:1.2;color:inherit;margin:.55rem 0 .25rem}"
-        ".listing-city,.amenities{color:inherit;opacity:.72;font-size:.82rem;margin:0}.listing-rating{display:flex;align-items:center;gap:.42rem;margin-top:.85rem;"
-        "font-size:.77rem;color:inherit;opacity:.78}.listing-rating strong{color:inherit}.rating-dot{display:inline-grid;place-items:center;"
-        "width:21px;height:21px;border-radius:50%;background:#00aa75;color:white;font-size:.72rem}.stay-card{min-height:205px;height:auto}"
-        ".stay-price{margin-top:.65rem;color:inherit;font-weight:800;font-size:1rem;white-space:nowrap}.stay-price span{font-size:.76rem;font-weight:500;opacity:.72}"
-        ".photo-note{color:inherit;opacity:.64;font-size:.7rem;margin-top:.6rem}.data-note{padding:.8rem 1rem;border-radius:12px;"
-        "background:var(--secondary-background-color,rgba(128,144,133,.07));border:1px solid rgba(128,144,133,.36);color:var(--text-color,inherit);font-size:.78rem}"
+        ".photo-note{color:inherit;opacity:.64;font-size:.7rem;margin-top:.6rem}"
         "@media(max-width:800px){.block-container{padding:.75rem 1rem 3rem!important}.hero{min-height:300px;padding:1.5rem;border-radius:20px}"
         ".destination-card{height:210px}.section-title{margin-top:1.5rem}"
         "[data-testid='stHorizontalBlock']{display:flex!important;flex-wrap:wrap!important;gap:.65rem!important}"
@@ -154,16 +126,17 @@ def _render_home() -> None:
         "<p>Start with a city, then explore the places and stays in its sample guide.</p></div>",
         unsafe_allow_html=True,
     )
-    destination_cities = [city for city in ("Goa", "Jaipur", "Delhi", "Mumbai") if city in cities]
-    if destination_cities:
-        destination_columns = st.columns(len(destination_cities))
-        for column, city in zip(destination_columns, destination_cities):
+    destination_cities = [city for city in cities if city in LOCATION_PHOTOS]
+    for start in range(0, len(destination_cities), 4):
+        city_batch = destination_cities[start : start + 4]
+        destination_columns = st.columns(len(city_batch))
+        for column, city in zip(destination_columns, city_batch):
             with column:
                 place_count = sum(place.get("city") == city for place in datasets["places"])
                 hotel_count = sum(hotel.get("city") == city for hotel in datasets["hotels"])
                 _render_city_card(city, place_count, hotel_count)
     photo_credits = " · ".join(
-        f"<a href='{CITY_PHOTOS[city]['credit']}' target='_blank' rel='noreferrer'>{html.escape(city)} photo</a>"
+        f"<a href='{LOCATION_PHOTOS[city]['credit']}' target='_blank' rel='noreferrer'>{html.escape(city)} photo</a>"
         for city in destination_cities
     )
     st.markdown(

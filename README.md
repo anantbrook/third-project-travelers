@@ -37,7 +37,7 @@ The supplied flight records cover January through December 2025. They are histor
 
 Hotel prices and flight fares do not include a currency field. The interface assumes Indian rupees based on the project brief and labels that assumption. Hotel nights are estimated as trip length minus one. Food and local travel cost is an editable per-day estimate.
 
-The supplied places, hotel, and flight records are sample project data, not live listings, current fares, or traveller reviews. Destination photos are hosted by Unsplash and credited in the app; property photos are not part of the supplied data.
+The supplied places, hotel, and flight records are sample project data, not live listings, current fares, or traveller reviews. Destination, place, and hotel card photos are illustrative Unsplash images with source links in the app; they do not depict a verified sample listing or represent booking availability.
 
 The places dataset does not contain coordinates. Weather uses a small city-coordinate mapping for the eight cities present in the supplied files. Open-Meteo forecasts are available up to 16 days ahead; dates outside that window are clearly marked unavailable.
 
