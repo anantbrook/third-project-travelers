@@ -101,21 +101,29 @@ def get_weather_forecast(
         )
         response.raise_for_status()
         payload = response.json()
-        daily = payload.get("daily", {})
-        forecast_dates = daily.get("time", [])
+        daily = payload.get("daily", {}) if isinstance(payload, dict) else {}
+        forecast_dates = daily.get("time", []) if isinstance(daily, dict) else []
+        if not isinstance(forecast_dates, list):
+            forecast_dates = []
         forecasts: dict[str, dict[str, Any]] = {}
+        end_date_exclusive = start_date + timedelta(days=trip_days)
         for index, forecast_date in enumerate(forecast_dates):
-            end_date_exclusive = start_date + timedelta(days=trip_days)
+            if not isinstance(forecast_date, str):
+                continue
             if forecast_date < start_date.isoformat() or forecast_date >= end_date_exclusive.isoformat():
                 continue
             code = _at(daily.get("weather_code", []), index)
-            forecasts[forecast_date] = {
-                "date": forecast_date,
-                "condition": (
-                    WEATHER_CODES.get(code, "Conditions unavailable")
+            try:
+                condition = (
+                    WEATHER_CODES.get(int(code), "Conditions unavailable")
                     if code is not None
                     else "Conditions unavailable"
-                ),
+                )
+            except (TypeError, ValueError, OverflowError):
+                condition = "Conditions unavailable"
+            forecasts[forecast_date] = {
+                "date": forecast_date,
+                "condition": condition,
                 "temperature_max_c": _at(daily.get("temperature_2m_max", []), index),
                 "temperature_min_c": _at(daily.get("temperature_2m_min", []), index),
                 "precipitation_probability_max": _at(daily.get("precipitation_probability_max", []), index),
@@ -144,5 +152,5 @@ def get_weather_forecast(
 
 
 def _at(values: list[Any], index: int) -> Any:
-    return values[index] if index < len(values) else None
+    return values[index] if isinstance(values, list) and 0 <= index < len(values) else None
 

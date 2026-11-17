@@ -41,7 +41,14 @@ def build_itinerary(
     weather: dict[str, Any],
 ) -> list[dict[str, str]]:
     """Create a simple fallback schedule from the highest-ranked local places."""
-    weather_by_date = {item["date"]: item for item in weather.get("days", [])}
+    forecast_days = weather.get("days", [])
+    if not isinstance(forecast_days, list):
+        forecast_days = []
+    weather_by_date = {
+        str(item["date"]): item
+        for item in forecast_days
+        if isinstance(item, dict) and item.get("date")
+    }
     itinerary = []
     for index in range(trip_days):
         day_date = start_date + timedelta(days=index)
@@ -49,10 +56,14 @@ def build_itinerary(
         second_place = places[index * 2 + 1] if index * 2 + 1 < len(places) else None
         day_weather = weather_by_date.get(day_date.isoformat())
         if day_weather:
-            weather_note = (
-                f"{day_weather['condition']}; high {day_weather['temperature_max_c']}°C, "
-                f"low {day_weather['temperature_min_c']}°C"
+            high = day_weather.get("temperature_max_c")
+            low = day_weather.get("temperature_min_c")
+            temperatures = (
+                f"high {high}°C, low {low}°C"
+                if high is not None and low is not None
+                else "temperatures unavailable"
             )
+            weather_note = f"{day_weather.get('condition', 'Conditions unavailable')}; {temperatures}"
             chance = day_weather.get("precipitation_probability_max")
             if chance is not None:
                 weather_note += f"; precipitation chance up to {chance}%"

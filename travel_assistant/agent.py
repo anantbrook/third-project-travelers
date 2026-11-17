@@ -6,31 +6,6 @@ import json
 from datetime import date, timedelta
 from typing import Any
 
-from pydantic import BaseModel, Field
-
-
-class DayPlan(BaseModel):
-    """One itinerary day in the agent's structured response."""
-
-    date: str = Field(description="Calendar date in YYYY-MM-DD format")
-    morning: str
-    afternoon: str
-    evening: str
-    weather: str
-
-
-class TripPlan(BaseModel):
-    """Typed response returned by the LangChain travel agent."""
-
-    summary: str
-    flight_recommendation: str
-    hotel_recommendation: str
-    days: list[DayPlan]
-    budget_summary: str
-    reasons: list[str]
-    limitations: list[str]
-
-
 def create_agent_plan(
     *,
     provider: str,
@@ -51,6 +26,27 @@ def create_agent_plan(
     """Ask a LangChain agent to call the travel tools and return a typed plan."""
     from langchain.agents import create_agent
     from langchain.tools import tool
+    from pydantic import BaseModel, Field
+
+    class DayPlan(BaseModel):
+        """One itinerary day in the agent's structured response."""
+
+        date: str = Field(description="Calendar date in YYYY-MM-DD format")
+        morning: str
+        afternoon: str
+        evening: str
+        weather: str
+
+    class TripPlan(BaseModel):
+        """Typed response returned by the LangChain travel agent."""
+
+        summary: str
+        flight_recommendation: str
+        hotel_recommendation: str
+        days: list[DayPlan]
+        budget_summary: str
+        reasons: list[str]
+        limitations: list[str]
 
     if provider == "gemini":
         from langchain_google_genai import ChatGoogleGenerativeAI
@@ -117,19 +113,11 @@ def create_agent_plan(
         return json.dumps(weather, ensure_ascii=False)
 
     @tool
-    def estimate_budget(
-        flight_cost: int,
-        hotel_price_per_night: int,
-        hotel_nights: int,
-        daily_local_cost: int,
-        trip_length_days: int,
-    ) -> str:
-        """Calculate a trip estimate using local dataset costs and the user's daily allowance."""
-        if trip_length_days != trip_days:
-            return "Use the duration and cost estimate returned by the selected trip request."
+    def get_budget_estimate() -> str:
+        """Return the deterministic budget estimate calculated for this trip request."""
         return json.dumps(budget, ensure_ascii=False)
 
-    tools = [search_flights, recommend_hotels, discover_places, get_weather, estimate_budget]
+    tools = [search_flights, recommend_hotels, discover_places, get_weather, get_budget_estimate]
     system_prompt = (
         "You are a travel-planning assistant. Call the supplied tools to ground the plan in the local datasets and weather response. "
         "Never invent flights, prices, attractions, or weather. A route example from a different date is historical sample data, not a bookable flight. "

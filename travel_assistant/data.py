@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+import math
 from datetime import date, datetime
+from itertools import chain
 from pathlib import Path
 from typing import Any
 
@@ -74,7 +76,7 @@ def load_datasets() -> dict[str, list[dict[str, Any]]]:
 def list_cities(datasets: dict[str, list[dict[str, Any]]]) -> list[str]:
     """Return the distinct cities represented across all three datasets."""
     cities: set[str] = set()
-    for record in datasets["hotels"] + datasets["places"]:
+    for record in chain(datasets["hotels"], datasets["places"]):
         city = record.get("city")
         if isinstance(city, str) and city.strip():
             cities.add(city.strip())
@@ -92,9 +94,9 @@ def find_flights(
     """Return flights matching route and exact departure date, cheapest first."""
     matches = []
     for flight in flights:
-        if flight.get("from", "").casefold() != origin.casefold():
+        if str(flight.get("from", "")).casefold() != origin.casefold():
             continue
-        if flight.get("to", "").casefold() != destination.casefold():
+        if str(flight.get("to", "")).casefold() != destination.casefold():
             continue
         try:
             flight_date = datetime.fromisoformat(flight["departure_time"]).date()
@@ -102,7 +104,7 @@ def find_flights(
             continue
         if flight_date == departure_date:
             matches.append(flight)
-    return sorted(matches, key=lambda item: float(item.get("price", 0)))
+    return sorted(matches, key=lambda item: _number(item.get("price")))
 
 
 def flight_duration_minutes(flight: dict[str, Any]) -> float:
@@ -110,9 +112,10 @@ def flight_duration_minutes(flight: dict[str, Any]) -> float:
     try:
         departure = datetime.fromisoformat(flight["departure_time"])
         arrival = datetime.fromisoformat(flight["arrival_time"])
+        duration = (arrival - departure).total_seconds() / 60
     except (KeyError, TypeError, ValueError):
         return float("inf")
-    return max((arrival - departure).total_seconds() / 60, 0)
+    return max(duration, 0)
 
 
 def find_route_samples(
@@ -122,30 +125,31 @@ def find_route_samples(
     matches = [
         flight
         for flight in flights
-        if flight.get("from", "").casefold() == origin.casefold()
-        and flight.get("to", "").casefold() == destination.casefold()
+        if str(flight.get("from", "")).casefold() == origin.casefold()
+        and str(flight.get("to", "")).casefold() == destination.casefold()
     ]
-    return sorted(matches, key=lambda item: float(item.get("price", 0)))[:limit]
+    return sorted(matches, key=lambda item: _number(item.get("price")))[:max(limit, 0)]
 
 
 def recommend_hotels(
     hotels: list[dict[str, Any]], city: str, max_price_per_night: int, min_stars: int
 ) -> list[dict[str, Any]]:
     """Rank city hotels, preferring those within budget and with more stars."""
-    matches = [
-        hotel
-        for hotel in hotels
-        if hotel.get("city", "").casefold() == city.casefold()
-        and int(hotel.get("stars", 0)) >= min_stars
-    ]
-    for hotel in matches:
-        hotel["within_budget"] = int(hotel.get("price_per_night", 0)) <= max_price_per_night
+    matches = []
+    for hotel in hotels:
+        if str(hotel.get("city", "")).casefold() != city.casefold():
+            continue
+        stars = int(_number(hotel.get("stars")))
+        if stars < min_stars:
+            continue
+        price = int(_number(hotel.get("price_per_night")))
+        matches.append({**hotel, "within_budget": price <= max_price_per_night})
     return sorted(
         matches,
         key=lambda hotel: (
             not hotel["within_budget"],
-            -int(hotel.get("stars", 0)),
-            int(hotel.get("price_per_night", 0)),
+            -int(_number(hotel.get("stars"))),
+            int(_number(hotel.get("price_per_night"))),
         ),
     )
 
@@ -155,7 +159,7 @@ def recommend_places(
 ) -> list[dict[str, Any]]:
     """Rank attractions for a city, prioritizing requested types and ratings."""
     city_places = [
-        place for place in places if place.get("city", "").casefold() == city.casefold()
+        place for place in places if str(place.get("city", "")).casefold() == city.casefold()
     ]
     requested = {item.casefold() for item in interests}
     if requested:
@@ -166,7 +170,7 @@ def recommend_places(
         ]
         if matching:
             city_places = matching
-    return sorted(city_places, key=lambda place: float(place.get("rating", 0)), reverse=True)
+    return sorted(city_places, key=lambda place: _number(place.get("rating")), reverse=True)
 
 
 def departure_date_range(flights: list[dict[str, Any]]) -> tuple[date, date] | None:
@@ -180,4 +184,13 @@ def departure_date_range(flights: list[dict[str, Any]]) -> tuple[date, date] | N
     if not dates:
         return None
     return min(dates), max(dates)
+
+
+def _number(value: Any, default: float = 0) -> float:
+    """Convert dataset values safely so one malformed value cannot break sorting."""
+    try:
+        number = float(value)
+    except (TypeError, ValueError, OverflowError):
+        return default
+    return number if math.isfinite(number) else default
 

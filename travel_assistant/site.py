@@ -44,9 +44,12 @@ def render_place_card(place: dict[str, Any]) -> None:
 def render_hotel_card(hotel: dict[str, Any]) -> None:
     title = html.escape(str(hotel.get("name", "Local stay")))
     city = html.escape(str(hotel.get("city", "")))
-    stars = int(hotel.get("stars", 0))
-    price = int(hotel.get("price_per_night", 0))
-    amenities = ", ".join(str(item).title() for item in hotel.get("amenities", [])[:3])
+    stars = _safe_int(hotel.get("stars"))
+    price = _safe_int(hotel.get("price_per_night"))
+    amenities_data = hotel.get("amenities", [])
+    if not isinstance(amenities_data, list):
+        amenities_data = []
+    amenities = ", ".join(str(item).title() for item in amenities_data[:3])
     amenities = html.escape(amenities or "Details not listed")
     st.markdown(
         f"<article class='listing-card stay-card'><div class='listing-kicker'>{'★' * stars} stay</div>"
@@ -55,6 +58,13 @@ def render_hotel_card(hotel: dict[str, Any]) -> None:
         "<span> / night · sample price</span></div></article>",
         unsafe_allow_html=True,
     )
+
+
+def _safe_int(value: Any, default: int = 0) -> int:
+    try:
+        return int(float(value))
+    except (TypeError, ValueError, OverflowError):
+        return default
 
 
 def render_listing_styles() -> None:
@@ -67,7 +77,7 @@ def render_listing_styles() -> None:
         "color:inherit;margin:0}"
         ".listing-card{min-width:0;min-height:170px;height:auto;box-sizing:border-box;padding:1.1rem 1.15rem;"
         "border:1px solid rgba(128,144,133,.28);border-radius:18px;"
-        "background:color-mix(in srgb,currentColor 5%,transparent);color:inherit;"
+        "background:var(--secondary-background-color,rgba(128,144,133,.07));color:var(--text-color,inherit);"
         "box-shadow:0 5px 18px rgba(0,0,0,.06);margin-bottom:.7rem}"
         ".listing-kicker{color:inherit;font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase}"
         ".listing-card h3{font-size:1.08rem;line-height:1.2;color:inherit;margin:.55rem 0 .25rem}"
@@ -79,8 +89,8 @@ def render_listing_styles() -> None:
         "background:#087a5b;color:white;font-size:.72rem}"
         ".stay-card{min-height:205px;height:auto}.stay-price{margin-top:.65rem;color:inherit;font-weight:800;font-size:1rem;white-space:nowrap}"
         ".stay-price span{font-size:.76rem;font-weight:500;opacity:.72}"
-        ".data-note{padding:.8rem 1rem;border-radius:12px;background:color-mix(in srgb,currentColor 5%,transparent);"
-        "border:1px solid rgba(128,144,133,.36);color:inherit;font-size:.78rem}"
+        ".data-note{padding:.8rem 1rem;border-radius:12px;background:var(--secondary-background-color,rgba(128,144,133,.07));"
+        "border:1px solid rgba(128,144,133,.36);color:var(--text-color,inherit);font-size:.78rem}"
         "@media(max-width:800px){.block-container{padding:.75rem 1rem 3rem!important}"
         "[data-testid='stHorizontalBlock']{display:flex!important;flex-wrap:wrap!important;gap:.65rem!important}"
         "[data-testid='stHorizontalBlock']>[data-testid='stColumn']{flex:1 1 100%!important;"

@@ -4,7 +4,8 @@ from __future__ import annotations
 
 import streamlit as st
 
-from travel_assistant.data import DatasetError, list_cities, load_datasets
+from travel_assistant.cache import get_cached_datasets
+from travel_assistant.data import DatasetError, list_cities
 from travel_assistant.site import render_listing_styles, render_place_card
 
 
@@ -17,13 +18,8 @@ st.set_page_config(
 render_listing_styles()
 
 
-@st.cache_data(show_spinner=False)
-def get_datasets():
-    return load_datasets()
-
-
 try:
-    datasets = get_datasets()
+    datasets = get_cached_datasets()
 except DatasetError as exc:
     st.error(str(exc))
     st.stop()

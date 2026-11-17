@@ -1,16 +1,18 @@
 # Agentic AI-Based Travel Planning Assistant
 
-A multipage Streamlit travel discovery and trip planning site built around the supplied flights, hotels, and places JSON files. It has separate Discover, Things to do, Stays, and Plan a trip pages. Destination, category, star, and price filters update as they are changed. The planner requests a live weather forecast from Open-Meteo, estimates trip costs, and creates a 3-7 day itinerary. With a Gemini free-tier or OpenAI API key configured, a LangChain tool-calling agent assembles the itinerary. Without a key, the planner uses the deterministic fallback.
+A multipage Streamlit travel discovery and trip planning site built around the supplied flights, hotels, and places JSON files. It has separate Discover, Things to do, Stays, and Plan a trip pages. Discover filters and destination selections carry into the dedicated trip planner, which is the single place to build and review an itinerary. Submitted plans stay visible while navigating the planner. Destination, category, star, and price filters update as they are changed. The planner requests a live weather forecast from Open-Meteo, estimates trip costs, and creates a 3–7 day itinerary. With a Gemini free-tier or OpenAI API key configured, a LangChain tool-calling agent assembles the itinerary. Without a key, the planner uses the deterministic fallback.
 
 ## Project contents
 
 - app.py: Discover page and Streamlit entry point.
 - pages/: Separate attraction, stay, and trip planning pages.
-- travel_assistant/site.py: Shared navigation and listing components.
+- travel_assistant/cache.py: Shared dataset and weather caches.
 - travel_assistant/data.py: JSON loading, validation, and dataset search.
+- travel_assistant/site.py: Shared navigation and listing components.
 - travel_assistant/weather.py: Open-Meteo daily forecast integration.
 - travel_assistant/planner.py: Budget calculations and non-LLM itinerary fallback.
 - travel_assistant/agent.py: LangChain tools and structured itinerary generation.
+- travel_assistant/trips.py and trip_view.py: Shared trip assembly and result rendering.
 - flights.json, hotels.json, places.json: supplied local datasets.
 
 ## Run locally
@@ -24,6 +26,8 @@ Or run the steps manually:
 3. Install dependencies with `python -m pip install -r requirements.txt`.
 4. Copy `.env.example` to `.env`. For the free Gemini API tier, get a key at [Google AI Studio](https://aistudio.google.com/apikey) and set `GEMINI_API_KEY`. The default model is `gemini-3.5-flash-lite`; change it with `GEMINI_MODEL`. OpenAI is also supported with `OPENAI_API_KEY` and `OPENAI_MODEL`.
 5. Start the app with `streamlit run app.py`.
+
+Run the core planner checks with `python -m unittest discover -s tests`.
 
 The planner works without an API key. In that mode, it uses deterministic filtering and ranking to build the day plan. The AI checkbox remains available and explains when no key is connected; selecting it without a key still uses the standard planner. Open-Meteo weather lookup does not need a key.
 

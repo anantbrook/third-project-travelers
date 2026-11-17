@@ -5,4 +5,7 @@ __pycache__/
 *.py[cod]
 .streamlit/secrets.toml
 .pytest_cache/
+.playwright-cli/
+.playwright-mcp/
+.codex-streamlit.*
 
