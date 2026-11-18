@@ -5,6 +5,7 @@ from __future__ import annotations
 import streamlit as st
 
 from travel_assistant.cache import get_cached_datasets
+from travel_assistant.catalog import HOTEL_SORT_OPTIONS, filter_hotels, sort_hotels
 from travel_assistant.data import DatasetError, list_cities
 from travel_assistant.site import render_hotel_card, render_listing_styles
 
@@ -47,20 +48,28 @@ with price_col:
         step=500,
         key="stays_max_price",
     )
+search_col, sort_col = st.columns([1.5, 1])
+with search_col:
+    query = st.text_input("Search stays", placeholder="Hotel name, city, or amenity", key="stays_search_query")
+with sort_col:
+    sort_by = st.selectbox("Sort by", HOTEL_SORT_OPTIONS, key="stays_sort_by")
 
-hotels = [
-    hotel for hotel in datasets["hotels"]
-    if (city == "All destinations" or hotel.get("city") == city)
-    and int(hotel.get("stars", 0)) >= min_stars
-    and int(hotel.get("price_per_night", 0)) <= max_price
-]
-hotels.sort(key=lambda item: (int(item.get("price_per_night", 0)), -int(item.get("stars", 0))))
+hotels = sort_hotels(
+    filter_hotels(
+        datasets["hotels"],
+        city=city,
+        min_stars=min_stars,
+        max_price=max_price,
+        query=query,
+    ),
+    sort_by,
+)
 
 st.markdown(
     "<div class='data-note'>Hotel details and prices are supplied sample data, not live offers or booking availability.</div>",
     unsafe_allow_html=True,
 )
-st.write(f"Showing {len(hotels)} sample stays. Filters update as you change them.")
+st.write(f"Showing {len(hotels)} of {len(datasets['hotels'])} sample stays. Filters update as you change them.")
 
 if not hotels:
     st.info("No stays match these filters.")

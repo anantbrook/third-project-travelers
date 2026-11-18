@@ -7,7 +7,9 @@ A multipage Streamlit travel discovery and trip planning site built around the s
 - app.py: Discover page and Streamlit entry point.
 - pages/: Separate attraction, stay, and trip planning pages.
 - travel_assistant/cache.py: Shared dataset and weather caches.
+- travel_assistant/catalog.py: Shared listing search, filtering, and sorting.
 - travel_assistant/data.py: JSON loading, validation, and dataset search.
+- travel_assistant/photos.py: Destination and illustrative listing photo catalog.
 - travel_assistant/site.py: Shared navigation and listing components.
 - travel_assistant/weather.py: Open-Meteo daily forecast integration.
 - travel_assistant/planner.py: Budget calculations and non-LLM itinerary fallback.
@@ -37,7 +39,7 @@ The supplied flight records cover January through December 2025. They are histor
 
 Hotel prices and flight fares do not include a currency field. The interface assumes Indian rupees based on the project brief and labels that assumption. Hotel nights are estimated as trip length minus one. Food and local travel cost is an editable per-day estimate.
 
-The supplied places, hotel, and flight records are sample project data, not live listings, current fares, or traveller reviews. Destination, place, and hotel card photos are illustrative Unsplash images with source links in the app; they do not depict a verified sample listing or represent booking availability.
+The supplied places, hotel, and flight records are sample project data, not live listings, current fares, or traveller reviews. Attraction categories match their sample names. Destination, place, and hotel card photos are illustrative Unsplash images with source links in the app; they do not depict a verified sample listing or represent booking availability. The Things to do and Stays pages support search, filters, and sorting. The trip planner previews a destination, place, and stay before building the itinerary.
 
 The places dataset does not contain coordinates. Weather uses a small city-coordinate mapping for the eight cities present in the supplied files. Open-Meteo forecasts are available up to 16 days ahead; dates outside that window are clearly marked unavailable.
 
@@ -45,7 +47,7 @@ This app provides recommendations only. It does not make reservations or purchas
 
 ## Configuration
 
-The optional agent uses LangChain's `create_agent` API and structured output. Gemini's free tier has provider-set usage limits, and Google may use free-tier prompts to improve its products. For Streamlit Community Cloud, add `GEMINI_API_KEY` in the app's Secrets settings. Do not commit `.env` or put API keys in source files.
+The optional agent uses LangChain's `create_agent` API and structured output. AI is off by default and can be enabled from the planner. Gemini's free tier has provider-set usage limits, and Google may use free-tier prompts to improve its products. For Streamlit Community Cloud, add `GEMINI_API_KEY` in the app's Secrets settings. Do not commit `.env` or put API keys in source files.
 
 ## Documentation
 

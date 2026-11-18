@@ -5,6 +5,7 @@ from __future__ import annotations
 import streamlit as st
 
 from travel_assistant.cache import get_cached_datasets
+from travel_assistant.catalog import PLACE_SORT_OPTIONS, filter_places, sort_places
 from travel_assistant.data import DatasetError, list_cities
 from travel_assistant.site import render_listing_styles, render_place_card
 
@@ -32,23 +33,34 @@ selected_city = st.session_state.get("browse_city", "All destinations")
 city_options = ["All destinations", *cities]
 if selected_city not in city_options:
     selected_city = "All destinations"
-city = st.selectbox("Destination", city_options, index=city_options.index(selected_city), key="things_destination")
+city_col, search_col = st.columns([1, 1.4])
+with city_col:
+    city = st.selectbox("Destination", city_options, index=city_options.index(selected_city), key="things_destination")
+with search_col:
+    query = st.text_input("Search places", placeholder="Name, city, or category", key="things_search_query")
 st.session_state["browse_city"] = city
 
 categories = sorted({str(place.get("type", "")).title() for place in datasets["places"] if place.get("type")})
-selected_categories = st.multiselect("Category", categories, key="things_categories")
-places = [
-    place for place in datasets["places"]
-    if (city == "All destinations" or place.get("city") == city)
-    and (not selected_categories or str(place.get("type", "")).title() in selected_categories)
-]
-places.sort(key=lambda item: float(item.get("rating", 0)), reverse=True)
+category_col, sort_col = st.columns([1.4, 1])
+with category_col:
+    selected_categories = st.multiselect("Category", categories, key="things_categories")
+with sort_col:
+    sort_by = st.selectbox("Sort by", PLACE_SORT_OPTIONS, key="things_sort_by")
+places = sort_places(
+    filter_places(
+        datasets["places"],
+        city=city,
+        categories=selected_categories,
+        query=query,
+    ),
+    sort_by,
+)
 
 st.markdown(
     "<div class='data-note'>Attraction names and ratings are supplied sample data, not live listings or traveler reviews.</div>",
     unsafe_allow_html=True,
 )
-st.write(f"Showing {len(places)} sample places. Filters update as you change them.")
+st.write(f"Showing {len(places)} of {len(datasets['places'])} sample places. Filters update as you change them.")
 
 if not places:
     st.info("No places match the selected destination and category.")
