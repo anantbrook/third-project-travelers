@@ -19,7 +19,9 @@ A multipage Streamlit travel discovery and trip planning site built around the s
 
 ## Run locally
 
-On Windows, double-click `run_travel_planner.bat`. It creates the virtual environment if needed, installs dependencies, and starts Streamlit.
+On a new Windows computer, install Python 3.10 or newer, copy or clone the whole project folder, then double-click `setup_for_new_computer.bat`. It creates the virtual environment, installs the dependencies, and starts Streamlit. Keep the project folder together so the app can read its JSON data files. The first setup needs an internet connection to download Python packages.
+
+`run_travel_planner.bat` is an equivalent shortcut for setup and launch. Both batch files use the same setup script. The planner works without API keys; AI keys are optional and should be configured separately in a local `.env` file or the hosting provider's secrets settings.
 
 Or run the steps manually:
 
