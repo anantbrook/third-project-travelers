@@ -9,7 +9,7 @@ import streamlit as st
 from travel_assistant.cache import get_cached_datasets
 from travel_assistant.data import DatasetError, list_cities
 from travel_assistant.photos import HERO_PHOTO, LOCATION_PHOTOS
-from travel_assistant.site import render_hotel_card, render_listing_styles, render_place_card, render_site_header
+from travel_assistant.site import register_site_pages, render_hotel_card, render_listing_styles, render_place_card, render_site_header
 
 
 st.set_page_config(
@@ -197,7 +197,7 @@ def main() -> None:
         "stays": st.Page("pages/2_Stays.py", title="Stays", url_path="stays"),
         "plan": st.Page("pages/3_Plan_your_trip.py", title="Plan a trip", url_path="plan-a-trip"),
     }
-    st.session_state["_trailwise_site_pages"] = pages
+    register_site_pages(pages)
     selected_page = st.navigation(list(pages.values()), position="hidden")
     selected_page.run()
 

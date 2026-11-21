@@ -10,6 +10,15 @@ import streamlit as st
 from .photos import hotel_photo, place_photo
 
 
+_SITE_PAGES: dict[str, object] | None = None
+
+
+def register_site_pages(pages: dict[str, object]) -> None:
+    """Keep the navigation registry shared with standalone page scripts."""
+    global _SITE_PAGES
+    _SITE_PAGES = pages
+
+
 def render_site_header(active_page: str = "discover") -> None:
     """Render a compact brand and same-tab page links across the app."""
     st.markdown(
@@ -47,7 +56,14 @@ def render_site_header(active_page: str = "discover") -> None:
             ("stays", "Stays"),
             ("plan", "Plan a trip"),
         )
-        pages = st.session_state.get("_trailwise_site_pages", {})
+        pages = _SITE_PAGES
+        if not pages:
+            st.markdown(
+                "<div class='site-brand'><span class='brand-mark' aria-hidden='true'>✦</span>TRAILWISE</div>",
+                unsafe_allow_html=True,
+                width="content",
+            )
+            return
         with st.container(horizontal=True, wrap=True, gap="small", vertical_alignment="center"):
             with st.container(key="site-brand", width="content"):
                 st.markdown(
