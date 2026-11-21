@@ -10,23 +10,54 @@ import streamlit as st
 from .photos import hotel_photo, place_photo
 
 
-def render_site_header() -> None:
-    """Render the shared brand beneath Streamlit's multipage navigation."""
+def render_site_header(active_page: str = "discover") -> None:
+    """Render a compact brand and same-tab page links across the app."""
     st.markdown(
         "<style>"
-        ".site-header{display:flex;align-items:center;justify-content:flex-start;font-size:1.35rem;"
-        "font-weight:850;letter-spacing:-.04em;white-space:nowrap;color:inherit;padding:.25rem 0 .8rem}"
-        ".brand{display:flex;align-items:center;gap:.45rem}"
+        ".st-key-site-header{margin:0 0 .8rem}"
+        ".st-key-site-header [data-testid='stHorizontalBlock']{align-items:center;gap:.35rem!important}"
+        ".st-key-site-header .st-key-site-brand [data-testid='stMarkdownContainer']{padding:.1rem 0}"
+        ".site-brand{display:flex;align-items:center;gap:.5rem;color:var(--text-color,inherit);"
+        "font-size:1.25rem;font-weight:850;letter-spacing:-.04em;white-space:nowrap}"
         ".brand-mark{display:inline-grid;place-items:center;width:30px;height:30px;"
-        "border-radius:10px;background:#00aa75;color:white;font-size:1rem}"
-        "@media(max-width:800px){.site-header{font-size:1.08rem;padding-bottom:.5rem}.brand-mark{width:25px;height:25px}}"
+        "border-radius:10px;background:#00aa75;color:#fff;font-size:1rem}"
+        ".st-key-site-header [data-testid='stPageLink']{display:flex;justify-content:center;margin:0}"
+        ".st-key-site-header [data-testid='stPageLink'] a{display:flex;justify-content:center;"
+        "min-height:2.2rem;padding:.4rem .45rem;border-radius:9px;color:var(--text-color,inherit);"
+        "font-size:.86rem;font-weight:650;text-decoration:none!important;white-space:nowrap;"
+        "transition:background-color .16s ease,color .16s ease}"
+        ".st-key-site-header [data-testid='stPageLink'] a:hover{background:var(--secondary-background-color,rgba(128,144,133,.12))}"
+        f".st-key-site-nav-{active_page} [data-testid='stPageLink'] a{{background:var(--secondary-background-color,rgba(128,144,133,.12))}}"
+        ".st-key-site-header [data-testid='stPageLink'] a:focus-visible{outline:2px solid var(--primary-color,#087a5b);outline-offset:2px}"
+        "@media(max-width:700px){.st-key-site-header [data-testid='stHorizontalBlock']{flex-wrap:wrap!important;gap:.2rem!important}"
+        ".st-key-site-header{margin-bottom:.25rem}"
+        ".st-key-site-header [data-testid='stHorizontalBlock']>[data-testid='stLayoutWrapper']:has(.st-key-site-brand){flex:0 0 100%!important;width:100%!important}"
+        ".st-key-site-header .st-key-site-brand{min-height:2.25rem!important}"
+        ".st-key-site-header .st-key-site-brand [data-testid='stMarkdownContainer']{padding:0}"
+        ".site-brand{font-size:1.12rem}.brand-mark{width:27px;height:27px}"
+        ".st-key-site-header [data-testid='stPageLink'] a{min-height:2rem;padding:.35rem .45rem;font-size:.8rem}}"
+        "@media(prefers-reduced-motion:reduce){.st-key-site-header [data-testid='stPageLink'] a{transition:none}}"
         "</style>",
         unsafe_allow_html=True,
     )
-    st.markdown(
-        "<header class='site-header'><div class='brand'><span class='brand-mark'>✦</span><span>TRAILWISE</span></div></header>",
-        unsafe_allow_html=True,
-    )
+    with st.container(key="site-header"):
+        link_pages = (
+            ("discover", "Discover"),
+            ("things", "Things to do"),
+            ("stays", "Stays"),
+            ("plan", "Plan a trip"),
+        )
+        pages = st.session_state.get("_trailwise_site_pages", {})
+        with st.container(horizontal=True, wrap=True, gap="small", vertical_alignment="center"):
+            with st.container(key="site-brand", width="content"):
+                st.markdown(
+                    "<div class='site-brand'><span class='brand-mark' aria-hidden='true'>✦</span>TRAILWISE</div>",
+                    unsafe_allow_html=True,
+                    width="content",
+                )
+            for key, label in link_pages:
+                with st.container(key=f"site-nav-{key}", width="content"):
+                    st.page_link(pages[key], label=label, width="content")
 
 
 def render_place_card(place: dict[str, Any]) -> None:
@@ -82,8 +113,8 @@ def _safe_int(value: Any, default: int = 0) -> int:
 def render_listing_styles() -> None:
     st.markdown(
         "<style>"
-        ".block-container{width:100%;max-width:1240px;box-sizing:border-box;margin-inline:auto;"
-        "padding:1rem clamp(1rem,3vw,2.5rem) 4rem}"
+        ".block-container{width:100%;max-width:1680px!important;box-sizing:border-box;margin-inline:auto;"
+        "padding:2rem clamp(1rem,2vw,2rem) 3rem!important}"
         "[data-testid='stHeader']{background:transparent}"
         ".section-title{margin:1.7rem 0 1rem}.section-title h2{font-size:1.75rem;letter-spacing:-.04em;"
         "color:inherit;margin:0}"
@@ -120,7 +151,7 @@ def render_listing_styles() -> None:
         ".destination-preview-copy h2{margin:.3rem 0;color:#fff;font-size:1.8rem}.destination-preview-credit{position:absolute;"
         "right:.8rem;bottom:.8rem;z-index:3;padding:.28rem .5rem;border-radius:999px;background:rgba(14,28,25,.78);"
         "color:#fff;font-size:.68rem}"
-        "@media(max-width:800px){.block-container{padding:.75rem 1rem 3rem!important}"
+        "@media(max-width:800px){.block-container{padding:2rem 1rem 2.25rem!important}"
         ".listing-photo{height:160px}"
         ".destination-preview{min-height:150px}.destination-preview-copy{padding:1rem;max-width:86%}"
         ".destination-preview-copy h2{font-size:1.45rem}"

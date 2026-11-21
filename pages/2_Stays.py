@@ -7,7 +7,7 @@ import streamlit as st
 from travel_assistant.cache import get_cached_datasets
 from travel_assistant.catalog import HOTEL_SORT_OPTIONS, filter_hotels, sort_hotels
 from travel_assistant.data import DatasetError, list_cities
-from travel_assistant.site import render_hotel_card, render_listing_styles
+from travel_assistant.site import render_hotel_card, render_listing_styles, render_site_header
 
 
 st.set_page_config(
@@ -17,6 +17,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 render_listing_styles()
+render_site_header("stays")
 
 
 try:

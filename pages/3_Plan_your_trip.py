@@ -18,7 +18,7 @@ from travel_assistant.data import (
     recommend_places,
 )
 from travel_assistant.photos import location_photo
-from travel_assistant.site import render_hotel_card, render_listing_styles, render_place_card
+from travel_assistant.site import render_hotel_card, render_listing_styles, render_place_card, render_site_header
 from travel_assistant.trip_view import render_trip_result
 from travel_assistant.trips import build_trip_plan
 
@@ -31,6 +31,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 render_listing_styles()
+render_site_header("plan")
 
 
 def setting(name: str) -> str:
@@ -78,24 +79,8 @@ st.title("Plan your trip")
 st.caption("Choose a route, dates, and budget to build a practical day-by-day plan.")
 
 providers = configured_providers()
-with st.sidebar:
-    st.header("AI provider")
-    provider_label = ""
-    if len(providers) > 1:
-        provider_label = st.selectbox("AI provider", list(providers), key="plan_ai_provider")
-    elif providers:
-        provider_label = next(iter(providers))
-    selected_provider = providers.get(provider_label)
-    if selected_provider:
-        st.caption(f"Connected: {provider_label} · {selected_provider['model']}")
-    else:
-        st.caption("No AI key is connected; the standard planner remains available.")
-        with st.expander("Enable free Gemini AI"):
-            st.markdown(
-                "Create a key in [Google AI Studio](https://aistudio.google.com/apikey), "
-                "then add this in Streamlit Cloud Secrets:"
-            )
-            st.code('GEMINI_API_KEY = "paste_your_key_here"', language="toml")
+provider_label = next(iter(providers), "")
+selected_provider = providers.get(provider_label)
 
 flight_range = departure_date_range(datasets["flights"])
 if flight_range and flight_range[1] < date.today():
@@ -182,8 +167,9 @@ min_stars = star_col.slider(
     key="plan_min_stars",
     on_change=_clear_previous_plan,
 )
-daily_local_cost = st.number_input(
-    "Food and local travel allowance per day (₹)",
+local_cost_col, flight_cost_col = st.columns(2)
+daily_local_cost = local_cost_col.number_input(
+    "Food and local travel per day (₹)",
     min_value=0,
     max_value=100000,
     value=2000,
@@ -191,7 +177,7 @@ daily_local_cost = st.number_input(
     key="plan_daily_local_cost",
     on_change=_clear_previous_plan,
 )
-estimated_flight_cost = st.number_input(
+estimated_flight_cost = flight_cost_col.number_input(
     "Optional flight estimate (₹)",
     min_value=0,
     max_value=500000,
@@ -220,6 +206,20 @@ use_ai = st.checkbox(
     help="When enabled, your trip request is sent to the connected provider and uses its quota or billing.",
     on_change=_clear_previous_plan,
 )
+with st.expander("AI provider settings", expanded=False):
+    if len(providers) > 1:
+        provider_label = st.selectbox("AI provider", list(providers), key="plan_ai_provider")
+        selected_provider = providers.get(provider_label)
+    if selected_provider:
+        st.caption(f"Connected: {provider_label} · {selected_provider['model']}")
+        st.caption("The connected provider is used only when the AI option above is enabled.")
+    else:
+        st.caption("No AI key is connected; the standard planner works without one.")
+        st.markdown(
+            "Create a free Gemini key in [Google AI Studio](https://aistudio.google.com/apikey), "
+            "then add it in Streamlit Cloud Secrets:"
+        )
+        st.code('GEMINI_API_KEY = "paste_your_key_here"', language="toml")
 if selected_provider:
     st.caption(f"{provider_label} is connected and will only be used when AI is enabled above.")
 elif use_ai:

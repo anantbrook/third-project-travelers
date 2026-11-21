@@ -7,7 +7,7 @@ import streamlit as st
 from travel_assistant.cache import get_cached_datasets
 from travel_assistant.catalog import PLACE_SORT_OPTIONS, filter_places, sort_places
 from travel_assistant.data import DatasetError, list_cities
-from travel_assistant.site import render_listing_styles, render_place_card
+from travel_assistant.site import render_listing_styles, render_place_card, render_site_header
 
 
 st.set_page_config(
@@ -17,6 +17,7 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 render_listing_styles()
+render_site_header("things")
 
 
 try:

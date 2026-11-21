@@ -36,13 +36,10 @@ def _render_city_card(city: str, places_count: int, hotels_count: int) -> None:
 
 def _render_home() -> None:
     render_listing_styles()
+    render_site_header("discover")
     st.markdown(
         "<style>"
-        ".block-container{width:100%;max-width:1240px;box-sizing:border-box;margin-inline:auto;padding:1rem clamp(1rem,3vw,2.5rem) 4rem}"
         "[data-testid='stHeader']{background:transparent}"
-        ".site-header{display:flex;align-items:center;justify-content:flex-start;padding:.2rem 0 .8rem;color:inherit}"
-        ".brand{display:flex;align-items:center;gap:.45rem;font-size:1.4rem;font-weight:850;letter-spacing:-.04em;white-space:nowrap}.brand-mark{display:inline-grid;place-items:center;"
-        "width:30px;height:30px;border-radius:10px;background:#00aa75;color:white;font-size:1rem}"
         ".hero{position:relative;isolation:isolate;display:flex;align-items:flex-end;min-height:340px;overflow:hidden;"
         "padding:2.4rem 2.8rem;border-radius:28px;color:#fff;background-image:linear-gradient(90deg,rgba(8,38,40,.82),rgba(8,38,40,.18)),"
         f"url('{HERO_PHOTO['url']}');background-position:center 53%;background-size:cover;box-shadow:0 18px 45px rgba(22,54,47,.16)}}"
@@ -57,7 +54,7 @@ def _render_home() -> None:
         ".destination-copy{position:absolute;left:1rem;right:1rem;bottom:1rem;color:white}.destination-copy span{font-size:.65rem;letter-spacing:.13em;font-weight:800;opacity:.85}"
         ".destination-copy h3{font-size:1.55rem;margin:.2rem 0;color:white}.destination-copy p{font-size:.77rem;margin:0;color:#f1f5f1}"
         ".photo-note{color:inherit;opacity:.64;font-size:.7rem;margin-top:.6rem}"
-        "@media(max-width:800px){.block-container{padding:.75rem 1rem 3rem!important}.hero{min-height:300px;padding:1.5rem;border-radius:20px}"
+        "@media(max-width:800px){.hero{min-height:300px;padding:1.5rem;border-radius:20px}"
         ".destination-card{height:210px}.section-title{margin-top:1.5rem}"
         "[data-testid='stHorizontalBlock']{display:flex!important;flex-wrap:wrap!important;gap:.65rem!important}"
         "[data-testid='stHorizontalBlock']>[data-testid='stColumn']{flex:1 1 calc(50% - .65rem)!important;"
@@ -200,8 +197,8 @@ def main() -> None:
         "stays": st.Page("pages/2_Stays.py", title="Stays", url_path="stays"),
         "plan": st.Page("pages/3_Plan_your_trip.py", title="Plan a trip", url_path="plan-a-trip"),
     }
-    selected_page = st.navigation(list(pages.values()), position="top")
-    render_site_header()
+    st.session_state["_trailwise_site_pages"] = pages
+    selected_page = st.navigation(list(pages.values()), position="hidden")
     selected_page.run()
 
 
